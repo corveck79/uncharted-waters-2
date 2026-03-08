@@ -43,7 +43,7 @@ export default function Fleet() {
   return (
     <MessageBox>
       <div
-        className="w-[1280px] h-[608px]"
+        className="w-[1248px] h-[608px]"
         style={{ background: `url('${backgroundImage}')` }}
       >
         {getPlayerFleet().map((ship, i) => (

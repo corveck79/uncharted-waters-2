@@ -26,9 +26,11 @@ const createWorld = () => {
         return;
       }
 
-      worldTimeTick();
+      const moved = characters.update();
 
-      characters.update();
+      if (moved) {
+        worldTimeTick();
+      }
     },
     draw: () => {
       const player = characters.player();

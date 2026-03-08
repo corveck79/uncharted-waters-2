@@ -3,6 +3,7 @@ import React, { ReactNode, useState } from 'react';
 import BuildingMenu from '../../common/BuildingMenu';
 import {
   buyUsedShip,
+  buyNewShip,
   getAvailableSailorId,
   SELL_SHIP_MODIFIER,
   sellShipNumber,
@@ -17,7 +18,7 @@ import BuildingWrapper from '../BuildingWrapper';
 import useBuilding from '../hooks/useBuilding';
 import { VendorMessageBoxType } from '../../quest/getMessageBoxes';
 import ShipyardShipInputName from './ShipyardShipInputName';
-import { canAfford, getUsedShips } from '../../../state/selectors';
+import { canAfford, getUsedShips, getNewShipsAvailable } from '../../../state/selectors';
 
 const shipyardOptions = [
   'New Ship',
@@ -30,7 +31,6 @@ const shipyardOptions = [
 type ShipyardOptions = typeof shipyardOptions[number];
 
 const shipyardDisabledOptions: ShipyardOptions[] = [
-  'New Ship',
   'Remodel',
   'Invest',
 ];
@@ -39,6 +39,7 @@ export default function Shipyard() {
   const { selectOption, back, next, state } = useBuilding<ShipyardOptions>();
 
   const [usedShipId, setUsedShipId] = useState<string>();
+  const [newShipId, setNewShipId] = useState<string>();
 
   const [selectedShipNumberToSell, setSelectedShipNumberToSell] =
     useState<number>();
@@ -65,6 +66,96 @@ export default function Shipyard() {
   let menu2: ReactNode;
 
   let children: ReactNode;
+
+  if (option === 'New Ship') {
+    const newShips = getNewShipsAvailable();
+
+    if (!newShips.length) {
+      vendorMessage = {
+        body: "Sorry, we don\u2019t have any new ships available at this port.",
+        acknowledge: back,
+      };
+    } else {
+      menu2 = (
+        <BuildingMenu
+          title="Ship Model"
+          options={newShips.map(({ shipId }) => ({
+            label: `${shipData[shipId].name} (${shipData[shipId].basePrice} gold)`,
+            value: shipId,
+          }))}
+          onSelect={(shipId) => {
+            setNewShipId(shipId);
+            next();
+          }}
+          onCancel={back}
+          level2
+          hidden={step !== 0}
+        />
+      );
+    }
+
+    if (newShipId) {
+      children = <ShipyardShipBox shipId={newShipId} />;
+
+      if (step === 1) {
+        vendorMessage = {
+          body: shipData[newShipId].description,
+          acknowledge: next,
+        };
+      }
+
+      if (step === 2) {
+        vendorMessage = {
+          body: `A brand new ${shipData[newShipId].name} will cost you ${shipData[newShipId].basePrice} gold. Interested?`,
+          confirm: {
+            yes: next,
+            no: () => {
+              setNewShipId(undefined);
+              back(2);
+            },
+          },
+        };
+      }
+
+      if (step === 3) {
+        if (!canAfford(shipData[newShipId].basePrice)) {
+          vendorMessage = {
+            body: 'You don\u2019t have enough gold for that ship.',
+            acknowledge: () => {
+              setNewShipId(undefined);
+              back(3);
+            },
+          };
+        } else if (!getAvailableSailorId()) {
+          vendorMessage = {
+            body: 'You don\u2019t have a sailor available to captain this ship.',
+            acknowledge: () => {
+              setNewShipId(undefined);
+              back(3);
+            },
+          };
+        } else {
+          vendorMessage = {
+            body: 'Excellent choice! What will you name her?',
+          };
+
+          children = (
+            <ShipyardShipInputName
+              onSubmit={(name) => {
+                buyNewShip(newShipId, name);
+                setNewShipId(undefined);
+                back(3);
+              }}
+              onCancel={() => {
+                setNewShipId(undefined);
+                back(3);
+              }}
+            />
+          );
+        }
+      }
+    }
+  }
 
   if (option === 'Used Ship') {
     const usedShips = getUsedShips();

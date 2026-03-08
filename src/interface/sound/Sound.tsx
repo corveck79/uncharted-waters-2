@@ -1,10 +1,7 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-
-import React, { useEffect, useRef, useState } from 'react';
-import { SpeakerXMarkIcon, SpeakerWaveIcon } from '@heroicons/react/24/solid';
+import { useEffect, useRef, useState } from 'react';
 
 import { getRegionOrIfSupplyPort } from '../../game/port/portUtils';
+import { audioState } from './audioState';
 
 import mastInTheMist from './assets/mast-in-the-mist.ogg';
 import themeOfJoao from './assets/theme-of-joão.ogg';
@@ -21,8 +18,8 @@ import moslemDance from './assets/moslem-dance.ogg';
 
   As Sound is never unmounted, calling pause() as described in
   https://developer.mozilla.org/en-US/docs/Web/API/HTMLAudioElement/Audio#memory_usage_and_management
-  won’t be necessary.
- */
+  won't be necessary.
+*/
 
 const getAudioElement = () => {
   const audio = new Audio();
@@ -84,9 +81,11 @@ interface Props {
 
 export default function Sound({ portId, buildingId }: Props) {
   const audioRef = useRef(getAudioElement());
-
   const [hasPlayed, setHasPlayed] = useState(false);
-  const [soundOn, setSoundOn] = useState(true);
+
+  useEffect(() => {
+    audioState.register(audioRef.current);
+  }, []);
 
   const triggerAutoplay = () => {
     audioRef.current.play();
@@ -94,12 +93,7 @@ export default function Sound({ portId, buildingId }: Props) {
   };
 
   useEffect(() => {
-    const track = getTrack({
-      portId,
-      buildingId,
-    });
-
-    // without this check, the track will play from the beginning
+    const track = getTrack({ portId, buildingId });
     if (audioRef.current.src !== track) {
       audioRef.current.src = track;
     }
@@ -119,19 +113,7 @@ export default function Sound({ portId, buildingId }: Props) {
     };
   }, [hasPlayed]);
 
-  useEffect(() => {
-    audioRef.current.muted = !soundOn;
-  }, [soundOn]);
-
-  return (
-    <div
-      className="select-none cursor-pointer p-2 inline-block align-bottom"
-      onClick={() => setSoundOn(!soundOn)}
-    >
-      {soundOn && <SpeakerWaveIcon className="h-8 w-8 text-lime-400" />}
-      {!soundOn && <SpeakerXMarkIcon className="h-8 w-8 text-red-600" />}
-    </div>
-  );
+  return null;
 }
 
 /*
@@ -140,4 +122,4 @@ export default function Sound({ portId, buildingId }: Props) {
   require.context() may come in handy
 
  TODO fade
- */
+*/

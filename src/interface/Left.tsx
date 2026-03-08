@@ -14,6 +14,7 @@ import Fleet from './Fleet';
 import Popover from './common/Popover';
 import Items from './Items';
 import Mates from './Mates';
+import SaveLoad from './SaveLoad';
 
 interface Props {
   portId: string | null;
@@ -44,34 +45,45 @@ export default function Left({
       data-test="left"
     >
       <div className="p-5">
-        <div className="text-2xl font-bold whitespace-nowrap">
+        <div className="text-xl font-bold whitespace-nowrap text-[#c9a84c]">
           {getDate(timePassed)}
         </div>
-        <div className="mb-20">
+        <div className="mb-6 text-sm text-[#aaaaaa]">
           {inPort ? getHoursMinutes(timePassed) : `Day ${dayAtSea}`}
         </div>
-        <div className="text-sm">Ingots</div>
-        <div className="mb-4 text-right text-xl">{getIngots(gold)}</div>
-        <div className="text-sm">Coins</div>
-        <div className="mb-4 text-right text-xl">{getCoins(gold)}</div>
+        <div
+          className="mb-5"
+          style={{ borderBottom: '1px solid rgba(201,168,76,0.15)' }}
+        />
+        <div className="flex justify-between items-baseline mb-3">
+          <span className="text-sm text-[#aaaaaa]">Ingots</span>
+          <span className="font-bold">{getIngots(gold)}</span>
+        </div>
+        <div className="flex justify-between items-baseline mb-3">
+          <span className="text-sm text-[#aaaaaa]">Coins</span>
+          <span className="font-bold">{getCoins(gold)}</span>
+        </div>
         {Boolean(children) && <div>{children}</div>}
       </div>
-      {inPort && (
-        <div className="select-none">
-          <Popover label="Mates">
-            <Mates />
-          </Popover>
-          <Popover label="Fleet">
-            <Fleet />
-          </Popover>
-          <Popover label="Items">
-            <Items />
-          </Popover>
-        </div>
-      )}
-      <div className="p-5 text-right">
-        <Sound portId={portId} buildingId={buildingId} />
+      <div className="select-none" style={{ borderTop: '1px solid rgba(201,168,76,0.2)' }}>
+        {inPort && (
+          <>
+            <Popover label="Mates">
+              <Mates />
+            </Popover>
+            <Popover label="Fleet">
+              <Fleet />
+            </Popover>
+            <Popover label="Items">
+              <Items />
+            </Popover>
+          </>
+        )}
+        <Popover label="Menu">
+          <SaveLoad />
+        </Popover>
       </div>
+      <Sound portId={portId} buildingId={buildingId} />
     </div>
   );
 }

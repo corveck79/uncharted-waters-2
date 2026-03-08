@@ -11,6 +11,10 @@ import Bank from './bank/Bank';
 import Church from './Church';
 import ItemShop from './ItemShop';
 import Pub from './Pub';
+import Market from './Market';
+import Palace from './Palace';
+import Guild from './Guild';
+import FortuneTeller from './FortuneTeller';
 
 interface Props {
   buildingId: string;
@@ -18,6 +22,10 @@ interface Props {
 
 export default function Building({ buildingId }: Props) {
   const { options } = buildings[buildingId];
+
+  if (buildingId === '1') {
+    return <Market />;
+  }
 
   if (buildingId === '2') {
     return <Pub />;
@@ -35,6 +43,14 @@ export default function Building({ buildingId }: Props) {
     return <Lodge />;
   }
 
+  if (buildingId === '6') {
+    return <Palace />;
+  }
+
+  if (buildingId === '7') {
+    return <Guild />;
+  }
+
   if (buildingId === '9') {
     return <Bank />;
   }
@@ -45,6 +61,10 @@ export default function Building({ buildingId }: Props) {
 
   if (buildingId === '11') {
     return <Church />;
+  }
+
+  if (buildingId === '12') {
+    return <FortuneTeller />;
   }
 
   const { back } = useBuilding();

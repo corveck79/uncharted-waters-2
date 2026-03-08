@@ -293,6 +293,52 @@ export const sellItem = (i: number) => {
   return true;
 };
 
+export const buyGoods = (goodsId: string, quantity: number, pricePerUnit: number) => {
+  const flagship = state.fleets['1'].ships[0];
+  if (!flagship) return;
+
+  state.gold -= quantity * pricePerUnit;
+
+  const existing = flagship.cargo.find((item) => item.type === goodsId);
+  if (existing) {
+    existing.quantity += quantity;
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    flagship.cargo.push({ type: goodsId as any, quantity });
+  }
+
+  updateGeneral();
+};
+
+export const sellGoods = (goodsId: string, quantity: number, pricePerUnit: number) => {
+  const flagship = state.fleets['1'].ships[0];
+  if (!flagship) return;
+
+  state.gold += quantity * pricePerUnit;
+
+  flagship.cargo = flagship.cargo
+    .map((item) =>
+      item.type === goodsId ? { ...item, quantity: item.quantity - quantity } : item,
+    )
+    .filter((item) => item.quantity > 0);
+
+  updateGeneral();
+};
+
+export const buyNewShip = (shipId: string, shipName: string) => {
+  state.gold -= shipData[shipId].basePrice;
+
+  addShip({
+    id: shipId,
+    name: shipName,
+    crew: 0,
+    cargo: [],
+    durability: shipData[shipId].durability,
+  });
+
+  updateGeneral();
+};
+
 // cost in the original game is economy / 20 + 5
 export const CREW_COST = 40;
 

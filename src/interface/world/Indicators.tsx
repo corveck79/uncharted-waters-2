@@ -1,5 +1,5 @@
 /*
-  Indicators frequently change, and in particular for the player’s fleet.
+  Indicators frequently change, and in particular for the player's fleet.
   In the event of rapidly changing directions, updating direction and speed
   through Redux or setState is too slow (> 10ms) and causes noticeable
   CPU usage.
@@ -11,9 +11,6 @@ import Assets from '../../assets';
 import updateInterface from '../../state/updateInterface';
 import { State } from '../../state/state';
 import { classNames } from '../interfaceUtils';
-
-const indicatorClass = 'flex items-center';
-const speedClass = 'flex-1 text-right text-4xl';
 
 interface Props {
   hidden: boolean;
@@ -50,33 +47,36 @@ export default function Indicators({ hidden }: Props) {
   return (
     <div
       className={classNames(
-        'h-full flex items-center p-5',
+        'p-5 space-y-6',
         hidden ? 'hidden' : '',
       )}
     >
-      <div className="w-full">
-        <div>
-          <div className="text-sm mb-4">Wind</div>
-          <div className={indicatorClass}>
-            <img className="w-20 h-20" ref={windDirectionRef} alt="" />
-            <div className={speedClass} ref={windSpeedRef} />
-          </div>
+      {/* Wind */}
+      <div>
+        <div className="text-xs text-[#aaaaaa] uppercase tracking-widest mb-2">Wind</div>
+        <div className="flex items-center justify-between">
+          <img className="w-10 h-10" ref={windDirectionRef} alt="" />
+          <div className="text-2xl font-bold" ref={windSpeedRef} />
         </div>
-        <div className="mt-8">
-          <div className="text-sm mb-4">Current</div>
-          <div className={indicatorClass}>
-            <img className="w-20 h-20" ref={currentDirectionRef} alt="" />
-            <div className={speedClass} ref={currentSpeedRef} />
-          </div>
+      </div>
+
+      {/* Current */}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+        <div className="text-xs text-[#aaaaaa] uppercase tracking-widest mb-2">Current</div>
+        <div className="flex items-center justify-between">
+          <img className="w-10 h-10" ref={currentDirectionRef} alt="" />
+          <div className="text-2xl font-bold" ref={currentSpeedRef} />
         </div>
-        <div className="mt-20">
-          <div className="text-sm mb-4">Your fleet</div>
-          <div className={indicatorClass}>
-            <img className="w-20 h-20" ref={playerFleetDirectionRef} alt="" />
-            <div className={speedClass}>
-              <div ref={playerFleetSpeedRef} />
-              <div className="text-xs mt-1 -mb-2">knots</div>
-            </div>
+      </div>
+
+      {/* Your fleet */}
+      <div style={{ borderTop: '1px solid rgba(201,168,76,0.15)', paddingTop: '1rem' }}>
+        <div className="text-xs text-[#c9a84c] uppercase tracking-widest mb-2">Your fleet</div>
+        <div className="flex items-center justify-between">
+          <img className="w-10 h-10" ref={playerFleetDirectionRef} alt="" />
+          <div className="text-right">
+            <div className="text-2xl font-bold" ref={playerFleetSpeedRef} />
+            <div className="text-xs text-[#aaaaaa]">knots</div>
           </div>
         </div>
       </div>

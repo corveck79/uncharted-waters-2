@@ -25,7 +25,7 @@ export default function Mates() {
     skills,
   } = mates[selectedI];
 
-  const { color } = characterData[sailorId];
+  const { color } = characterData[sailorId] ?? { color: 'text-white' };
 
   return (
     <MessageBox>

@@ -61,15 +61,41 @@ export default function Popover({ label, children }: Props) {
       </Transition>
       <div
         className={classNames(
-          'relative cursor-pointer p-5 hover:bg-gray-800',
-          active ? 'bg-gray-800' : '',
+          'relative cursor-pointer transition-all duration-100',
+          'border-t border-white/10',
+          active
+            ? 'bg-[#c9a84c]/20'
+            : 'hover:bg-[#c9a84c]/10',
         )}
         onClick={() => setActive(true)}
+        style={active ? { borderLeft: '3px solid #c9a84c' } : { borderLeft: '3px solid transparent' }}
       >
-        <div className="text-right">{label}</div>
+        <div className="flex items-center justify-between px-4 py-3">
+          <span
+            className={classNames(
+              'text-sm tracking-widest uppercase font-medium',
+              active ? 'text-[#c9a84c]' : 'text-[#aaaaaa]',
+            )}
+          >
+            {label}
+          </span>
+          <span
+            className={classNames(
+              'text-xs',
+              active ? 'text-[#c9a84c]' : 'text-[#555555]',
+            )}
+          >
+            ▶
+          </span>
+        </div>
         {active && (
-          <div className="absolute left-full bottom-1/2 translate-y-1/2 z-40">
-            {children}
+          <div
+            className="fixed inset-0 flex items-center justify-center z-40"
+            style={{ pointerEvents: 'none' }}
+          >
+            <div style={{ pointerEvents: 'auto' }}>
+              {children}
+            </div>
           </div>
         )}
       </div>

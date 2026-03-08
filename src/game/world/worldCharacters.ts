@@ -50,7 +50,7 @@ const createWorldCharacters = (map: Map) => {
 
       if (Input.getPressedE() && dock(player.position())) {
         player.setHeading('');
-        return;
+        return false;
       }
 
       const direction = Input.getDirection({ includeOrdinal: true });
@@ -81,6 +81,8 @@ const createWorldCharacters = (map: Map) => {
         //   npc.undoMove();
         // }
       });
+
+      return !!heading;
     },
     player: () => player,
     npcs: () => npcs,

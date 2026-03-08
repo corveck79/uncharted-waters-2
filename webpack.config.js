@@ -62,6 +62,7 @@ module.exports = (env, argv) => {
 
     config.devServer = {
       static: false,
+      port: process.env.PORT || 8080,
     };
 
     config.module.rules[0].options = {
