@@ -1,5 +1,4 @@
 import { START_TIME_PASSED } from '../constants';
-import { fleets } from '../game/world/fleets';
 
 export interface PlayerCharacter {
   id: string;
@@ -88,12 +87,36 @@ export const playerCharacters: PlayerCharacter[] = [
   },
 ];
 
+const genUid = () =>
+  `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+
 export function getStartingState(character: PlayerCharacter) {
+  // The other 5 characters sail the world as NPC rivals (fleets '2'–'6')
+  const npcFleets: Record<string, { position: undefined; ships: object[] }> = {};
+  let fleetId = 2;
+  for (const npc of playerCharacters) {
+    if (npc.id === character.id) continue;
+    npcFleets[String(fleetId)] = {
+      position: undefined,
+      ships: [
+        {
+          uid: genUid(),
+          id: '6', // Caravela Latina
+          name: `${npc.name}'s Ship`,
+          crew: 10,
+          cargo: [],
+          durability: 30,
+        },
+      ],
+    };
+    fleetId += 1;
+  }
+
   return {
     portId: character.startingPortId,
     buildingId: null,
     timePassed: START_TIME_PASSED,
-    fleets: JSON.parse(JSON.stringify(fleets)),
+    fleets: { '1': { position: undefined, ships: [] }, ...npcFleets },
     dayAtSea: 0,
     gold: character.startingGold,
     quests: [],

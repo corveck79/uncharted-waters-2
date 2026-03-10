@@ -26,4 +26,4 @@
 - [x] **Exit animatie** zichtbaar (PercentNextMove pauzeren) ✓
 - [x] **Menu bug**: Topmost-menu keyboard stack ✓
 - [x] **Service worker** (offline spelen) ✓
-- [ ] **NPC vloot**: Pathfinding — te complex, overgeslagen
+- [x] **NPC vloot**: Pathfinding ✓ — collision check hersteld (`npc.destination()`)
