@@ -8,11 +8,15 @@ import ProgressBar from './common/ProgressBar';
 import { classNames } from './interfaceUtils';
 import { sailorSkills } from '../data/sailorData';
 import characterData from '../data/characterData';
+import { playerCharacters } from '../data/playerCharacters';
+import { setFirstMate } from '../state/actionsPort';
 
 export default function Mates() {
-  const mates = getMates();
-
   const [selectedI, setSelectedI] = useState(0);
+  const [step, setStep] = useState<'list' | 'confirm'>('list');
+  const [, setTick] = useState(0);
+
+  const mates = getMates();
 
   const {
     sailorId,
@@ -27,18 +31,48 @@ export default function Mates() {
 
   const { color } = characterData[sailorId] ?? { color: 'text-white' };
 
+  const isPlayer = selectedI === 0;
+  const isFirstMate = role === 'firstMate';
+  // Any non-player mate who isn't already first mate can be assigned
+  const canBeFirstMate = !isPlayer && !isFirstMate;
+
   return (
     <MessageBox>
       <div className="flex">
         <div className="w-[280px]">
-          <Menu
-            options={mates.map((mate, i) => ({
-              label: mate.name,
-              value: i,
-            }))}
-            onSelect={() => {}}
-            onActiveIndex={setSelectedI}
-          />
+          {step === 'list' && (
+            <Menu
+              options={mates.map((mate, i) => ({
+                label: mate.name,
+                value: i,
+              }))}
+              onSelect={() => {
+                if (canBeFirstMate) setStep('confirm');
+              }}
+              onActiveIndex={setSelectedI}
+            />
+          )}
+          {step === 'confirm' && (
+            <div className="text-black text-2xl p-4">
+              <div className="mb-6 font-bold">
+                Make {name} First Mate?
+              </div>
+              <Menu
+                options={[
+                  { label: 'Yes', value: 'yes' as const },
+                  { label: 'No', value: 'no' as const },
+                ]}
+                onSelect={(v) => {
+                  if (v === 'yes') {
+                    setFirstMate(sailorId);
+                    setTick((n) => n + 1);
+                  }
+                  setStep('list');
+                }}
+                onActiveIndex={() => {}}
+              />
+            </div>
+          )}
         </div>
         <div className="relative text-black text-2xl p-8">
           <div className="flex items-center">
@@ -54,7 +88,7 @@ export default function Mates() {
               <div className="text-lg text-gray-500">Age {age}</div>
               <div className="mt-4">
                 <div>{getRoleDisplay(role)}</div>
-                <div>Loyal to Portugal</div>
+                <div>Loyal to {playerCharacters.find((c) => c.sailorId === sailorId)?.nationality ?? 'Unknown'}</div>
               </div>
             </div>
           </div>

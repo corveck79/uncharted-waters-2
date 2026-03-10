@@ -2,7 +2,7 @@ import state, { Role } from './state';
 import generateUsedShips from '../interface/port/shipyard/generateUsedShips';
 import type { QuestId } from '../interface/quest/questData';
 import { getPortData } from '../game/port/portUtils';
-import { itemData } from '../data/itemData';
+import { itemData, ItemId, isWeapon, isArmor } from '../data/itemData';
 import { getPlayerFleet } from './selectorsFleet';
 import createMap from '../map';
 import { applyPositionDelta } from '../utils';
@@ -113,6 +113,16 @@ export const getPlayerItems = () =>
 
 export const getPlayerItem = (i: number) => itemData[state.items[i]];
 
+export const canBuyItem = (itemId: ItemId): boolean => {
+  if (isWeapon(itemId)) {
+    return !state.items.some((id) => isWeapon(id));
+  }
+  if (isArmor(itemId)) {
+    return !state.items.some((id) => isArmor(id));
+  }
+  return true;
+};
+
 export const getMates = () =>
   state.mates.map((mate) => ({
     ...mate,
@@ -163,8 +173,10 @@ export const getRoleDisplay = (role: Role) => {
   return `Captain of ${shipName}`;
 };
 
-// TODO needs to be implemented
-export const getFirstMateId = () => '32';
+export const getFirstMateId = () =>
+  state.mates.find(({ role }) => role === 'firstMate')?.sailorId ?? '32';
+
+export const getPlayerSailorId = () => state.mates[0]?.sailorId ?? '1';
 
 export const isLisbon = () => state.portId === '1';
 
@@ -200,6 +212,8 @@ export const getCargoCapacityLeft = () => {
   return total - used;
 };
 
+export const getCurrentPortId = () => state.portId;
+
 export const getCurrentMarketId = () => {
   if (!state.portId) return '1';
   const port = getPortData(state.portId);
@@ -207,12 +221,59 @@ export const getCurrentMarketId = () => {
   return port.marketId;
 };
 
+export const getPortInvestment = (portId: string) =>
+  state.portInvestments?.[portId] || { economy: 0, industry: 0 };
+
+export const getEffectiveIndustry = (portId: string) => {
+  const port = getPortData(portId);
+  if (port.isSupplyPort) return 0;
+  return port.industry + getPortInvestment(portId).industry;
+};
+
+export const getEffectiveEconomy = (portId: string) => {
+  const port = getPortData(portId);
+  if (port.isSupplyPort) return 0;
+  return port.economy + getPortInvestment(portId).economy;
+};
+
 export const getNewShipsAvailable = () => {
   if (!state.portId) return [];
   const port = getPortData(state.portId);
   if (port.isSupplyPort) return [];
-  const { industryId, industry } = port;
+  const { industryId } = port;
+  const industry = getEffectiveIndustry(state.portId);
   return (shipyardsToShips[industryId] || []).filter(
     (ship) => ship.industryRequirement <= industry,
   );
+};
+
+// Player nationality index: maps sailorId to the allegiance array index used in portData.ts.
+// portData allegiance ordering: [Portugal=0, Spain=1, Ottoman=2, England=3, Italy=4, Holland=5]
+const SAILOR_ID_TO_ALLEGIANCE_INDEX: { [key: string]: number } = {
+  '1': 0, // João  – Portugal
+  '2': 3, // Otto  – England
+  '3': 1, // Catalina – Spain
+  '4': 5, // Ernst – Holland
+  '5': 4, // Pietro – Italy
+  '6': 2, // Ali   – Ottoman
+};
+
+export const getPlayerNationalityIndex = (): number => {
+  if (state.nationalityIndex !== undefined) return state.nationalityIndex;
+  const playerSailorId = state.mates[0]?.sailorId;
+  const idx = SAILOR_ID_TO_ALLEGIANCE_INDEX[playerSailorId];
+  return idx !== undefined ? idx : 0;
+};
+
+export const isPortBlockaded = (): boolean => {
+  if (!state.portId) return false;
+  const port = getPortData(state.portId);
+  if (port.isSupplyPort) return false;
+
+  const { allegiances } = port;
+  const maxAllegiance = Math.max(...allegiances);
+  if (maxAllegiance < 50) return false;
+
+  const dominantIdx = allegiances.indexOf(maxAllegiance);
+  return dominantIdx !== getPlayerNationalityIndex();
 };

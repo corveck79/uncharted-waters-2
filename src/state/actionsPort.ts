@@ -45,7 +45,9 @@ export const exitBuilding = (sleep = false) => {
 export const getAvailableSailorId = () =>
   state.mates.find(({ role }) => role === null || Number.isNaN(role))?.sailorId;
 
-export const addShip = (ship: Omit<Ship, 'sailorId'>) => {
+const generateShipUid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+
+export const addShip = (ship: Omit<Ship, 'sailorId' | 'uid'>) => {
   const sailorId = getAvailableSailorId();
   const fleet = getPlayerFleet();
 
@@ -53,7 +55,7 @@ export const addShip = (ship: Omit<Ship, 'sailorId'>) => {
     throw Error('Tried to add a ship to fleet despite no available sailors');
   }
 
-  fleet.push(ship);
+  fleet.push({ ...ship, uid: generateShipUid() });
 
   for (let i = 0; i < state.mates.length; i += 1) {
     if (state.mates[i].sailorId === sailorId) {
@@ -249,8 +251,9 @@ export const repay = (amount: number) => {
   updateGeneral();
 };
 
-// TODO implement luck
-export const pray = () => {};
+export const pray = () => {
+  state.luckBoost = 1;
+};
 
 export const donate = (amount: number) => {
   const percent = (amount / state.gold) * 100;
@@ -261,9 +264,9 @@ export const donate = (amount: number) => {
   return percent;
 };
 
-export const buyItem = (id: ItemId, gift = false) => {
+export const buyItem = (id: ItemId, gift = false, customPrice?: number) => {
   if (!gift) {
-    const { price } = itemData[id];
+    const price = customPrice ?? itemData[id].price;
 
     if (price > state.gold) {
       return false;
@@ -339,6 +342,44 @@ export const buyNewShip = (shipId: string, shipName: string) => {
   updateGeneral();
 };
 
+export const REMODEL_COST_MODIFIER = 0.3;
+
+export const getRemodelCost = (targetShipId: string) =>
+  Math.floor(shipData[targetShipId].basePrice * REMODEL_COST_MODIFIER);
+
+export const remodelShip = (shipNumber: number, targetShipId: string) => {
+  const ship = state.fleets['1'].ships[shipNumber];
+  state.gold -= getRemodelCost(targetShipId);
+  ship.id = targetShipId;
+  ship.durability = shipData[targetShipId].durability;
+  updateGeneral();
+};
+
+export const INVEST_COST_PER_POINT = 20; // 20 gold = +1 industry/economy
+
+const ensurePortInvestment = (portId: string) => {
+  if (!state.portInvestments) state.portInvestments = {};
+  if (!state.portInvestments[portId]) {
+    state.portInvestments[portId] = { economy: 0, industry: 0 };
+  }
+};
+
+export const investInMarket = (gold: number) => {
+  const portId = state.portId!;
+  ensurePortInvestment(portId);
+  state.gold -= gold;
+  state.portInvestments[portId].economy += Math.floor(gold / INVEST_COST_PER_POINT);
+  updateGeneral();
+};
+
+export const investInShipyard = (gold: number) => {
+  const portId = state.portId!;
+  ensurePortInvestment(portId);
+  state.gold -= gold;
+  state.portInvestments[portId].industry += Math.floor(gold / INVEST_COST_PER_POINT);
+  updateGeneral();
+};
+
 // cost in the original game is economy / 20 + 5
 export const CREW_COST = 40;
 
@@ -364,5 +405,41 @@ export const recruitCrew = (amount: number) => {
 
   state.gold -= amount * CREW_COST;
 
+  updateGeneral();
+};
+
+export const setFirstMate = (sailorId: string) => {
+  // Player (mates[0]) cannot be assigned as first mate
+  if (state.mates[0]?.sailorId === sailorId) return;
+
+  // Clear the current first mate role
+  for (const mate of state.mates) {
+    if (mate.role === 'firstMate') {
+      mate.role = null;
+    }
+  }
+
+  // Assign the new first mate
+  const mate = state.mates.find((m) => m.sailorId === sailorId);
+  if (mate) {
+    mate.role = 'firstMate';
+  }
+};
+
+export const defect = (nationalityIndex: number) => {
+  state.nationalityIndex = nationalityIndex;
+  updateGeneral();
+};
+
+export const receiveShipReward = (portId: string, shipId: string, shipName: string) => {
+  if (!state.shipRewardsReceived) state.shipRewardsReceived = [];
+  state.shipRewardsReceived.push(portId);
+  addShip({
+    id: shipId,
+    name: shipName,
+    crew: 0,
+    cargo: [],
+    durability: shipData[shipId].durability,
+  });
   updateGeneral();
 };

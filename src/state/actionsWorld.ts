@@ -17,6 +17,7 @@ import {
   shouldUpdateWorldStatus,
 } from './selectors';
 import { Position } from '../types';
+import { regularPorts } from '../data/portData';
 
 export const dock = (position: Position) => {
   const portId = portAdjacentAt(position);
@@ -25,7 +26,8 @@ export const dock = (position: Position) => {
     return false; // TODO show message
   }
 
-  // TODO NPC fleet positions need to be saved as well
+  // NPC fleet positions are synced to state.fleets in worldCharacters.ts
+  // immediately after dock() returns, so they are included in any save.
   const playerFleet = state.fleets[1];
 
   if (playerFleet.position) {
@@ -118,6 +120,14 @@ export const setDockedFleetPositions = () => {
 
     playerFleet.position = positionAdjacentToPort(state.portId);
   }
+
+  Object.entries(state.fleets).forEach(([id, fleet]) => {
+    if (id === '1' || fleet.position) return;
+    const randomPortId = String(
+      Math.floor(Math.random() * regularPorts.length) + 1,
+    );
+    fleet.position = positionAdjacentToPort(randomPortId);
+  });
 };
 
 export const setSail = () => {

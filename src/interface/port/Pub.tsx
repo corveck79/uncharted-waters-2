@@ -6,7 +6,7 @@ import {
 } from '../quest/getMessageBoxes';
 import BuildingMenu from '../common/BuildingMenu';
 import BuildingWrapper from './BuildingWrapper';
-import { getFirstMateId, getGold, isLisbon } from '../../state/selectors';
+import { getFirstMateId, getGold, isLisbon, getPlayerSailorId } from '../../state/selectors';
 import { getCrewNeeded, getPlayerFleet } from '../../state/selectorsFleet';
 import { CREW_COST, recruitCrew } from '../../state/actionsPort';
 
@@ -85,7 +85,7 @@ export default function Pub() {
     if (step === 1) {
       characterMessage = {
         body: 'Hey! Do any of you tough sailors want to join our crew?',
-        characterId: '1',
+        characterId: getPlayerSailorId(),
         acknowledge: next,
       };
     }
