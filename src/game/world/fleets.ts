@@ -9,6 +9,7 @@ interface Cargo {
 }
 
 export interface Ship {
+  uid: string;
   id: string;
   name: string;
   crew: number;

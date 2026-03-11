@@ -11,7 +11,9 @@
     "test:e2e": "npm run build && (http-server build --silent & cypress run --browser chrome kill $!)",
     "test:e2e-firefox": "npm run build && (http-server build --silent & cypress run --browser firefox kill $!)",
     "test:e2e-edge": "npm run build && (http-server build --silent & cypress run --browser edge kill $!)",
-    "build": "rm -rf build/ && webpack --mode production"
+    "build": "rm -rf build/ && webpack --mode production",
+    "agent": "tsx src/agent/cli.ts",
+    "agent:interactive": "tsx src/agent/cli.ts --interactive"
   },
   "author": "Johan Li",
   "license": "MIT",
@@ -31,12 +33,17 @@
     ]
   },
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.72",
     "@babel/runtime": "^7.19.4",
     "@headlessui/react": "^1.7.3",
     "@heroicons/react": "^2.0.12",
+    "@openrouter/sdk": "^0.9.11",
+    "dotenv": "^17.3.1",
+    "eventemitter3": "^5.0.4",
     "lodash.throttle": "^4.1.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",
@@ -49,6 +56,7 @@
     "@swc/jest": "^0.2.23",
     "@types/jest": "^29.2.0",
     "@types/lodash.throttle": "^4.1.7",
+    "@types/node": "^25.4.0",
     "@types/react": "^18.0.21",
     "@types/react-dom": "^18.0.6",
     "@typescript-eslint/eslint-plugin": "^5.40.1",
@@ -81,10 +89,13 @@
     "style-loader": "^3.3.1",
     "tailwindcss": "^3.1.8",
     "ts-jest": "^29.0.3",
-    "typescript": "^4.8.4",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.11.1"
+    "webpack-dev-server": "^4.15.2",
+    "workbox-webpack-plugin": "^7.4.0"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

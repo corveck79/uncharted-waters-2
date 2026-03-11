@@ -81,6 +81,7 @@ export const playerCharacters: PlayerCharacter[] = [
     goal: 'Make a Fortune Trading',
     description:
       'Ali has struggled to make ends meet in Istanbul since he was a child. Now, with a merchant ship, he will try to make his fortune trading in foreign lands.',
+    religion: 'muslim',
     startingPortId: '3',
     startingGold: 1200,
     startingDebt: 0,

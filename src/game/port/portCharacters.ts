@@ -10,18 +10,28 @@ import {
   getStartFrame,
   portNpcData,
   portPlayerData,
+  portCharacterType,
 } from '../../data/portCharactersData';
+import { isPortBlockaded } from '../../state/selectors';
+import { getPlayerSailorId } from '../../state/selectors';
 
 const createPortCharacters = (
   map: Map,
   building: Building,
   isSupplyPort: boolean,
 ) => {
-  const { type, spawn } = portPlayerData;
+  const { spawn } = portPlayerData;
+
+  // Determine which port character type to use based on the selected sailor
+  const sailorId = getPlayerSailorId();
+  const SAILOR_TO_PORT_TYPE: Record<string, typeof portCharacterType[number]> = {
+    '6': 'MAN', // Ali Vezas uses MAN sprite instead of default PLAYER
+  };
+  const playerType = SAILOR_TO_PORT_TYPE[sailorId] || 'PLAYER';
 
   const player = createPlayer(
     applyPositionDelta(building.get(spawn.buildingId), spawn.offset),
-    getStartFrame(type),
+    getStartFrame(playerType),
     's',
   );
 
@@ -89,8 +99,10 @@ const createPortCharacters = (
         return;
       }
 
+      const blockaded = isPortBlockaded();
+
       portNpcData
-        .filter((npc) => npc.type !== 'GUARD') // TODO implement blockade
+        .filter((npc) => (blockaded ? npc.type === 'GUARD' : npc.type !== 'GUARD'))
         .forEach((npc) => {
           const { type: npcId, spawn: npcSpawn, isStationary = false } = npc;
 

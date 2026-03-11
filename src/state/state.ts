@@ -50,6 +50,10 @@ export interface State {
   debt: number;
   items: ItemId[];
   mates: Mate[];
+  luckBoost: number;
+  portInvestments: { [portId: string]: { economy: number; industry: number } };
+  nationalityIndex?: number; // overrides sailorId-derived nationality after defecting
+  shipRewardsReceived?: string[]; // portIds where ruler gave a ship
 }
 
 export const SAVED_STATE_KEY = 'savedState';
@@ -70,6 +74,8 @@ const state = {
   savings: 0,
   debt: 0,
   items: [],
+  luckBoost: 0,
+  portInvestments: {},
   mates: [
     {
       sailorId: '1',

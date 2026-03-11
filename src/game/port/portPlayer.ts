@@ -117,6 +117,8 @@ const createPortPlayer = (
   let frameAlternate = 0;
 
   let buildingId: string | null = null;
+  /** Building to enter once the entry-walk animation completes. */
+  let pendingBuildingId: string | null = null;
 
   const animate = () => {
     frameAlternate = frameAlternate === 0 ? 1 : 0;
@@ -177,13 +179,29 @@ const createPortPlayer = (
 
       return !!buildingId;
     },
-    // TODO exit animation isn’t visible — PercentNextMove should not advance when in buildings
     enteredBuilding: () => {
+      /*
+        Two-phase entry so the walk-into-door animation is visible:
+
+        Phase 1 (buildingId is set by willEnterBuilding): set up the south-walk
+        animation without calling enterBuilding() yet. The port loop keeps
+        running because state.buildingId is still null.
+
+        Phase 2 (pendingBuildingId is set, next update cycle after PNM
+        completes): call enterBuilding(), which sets state.buildingId and opens
+        the building UI.
+      */
+      if (pendingBuildingId) {
+        enterBuilding(pendingBuildingId);
+        pendingBuildingId = null;
+        return true;
+      }
+
       if (!buildingId) {
         return false;
       }
 
-      enterBuilding(buildingId);
+      pendingBuildingId = buildingId;
       buildingId = null;
 
       animate();

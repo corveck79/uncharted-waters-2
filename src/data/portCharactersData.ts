@@ -161,3 +161,13 @@ export const getStartFrame = (type: PortCharacterType) => {
     (i - STATIONARY_FROM_I) * FRAMES_PER_STATIONARY_CHARACTER
   );
 };
+
+// Mapping: sailorId → frame offset for port character sprites
+export const SAILOR_ID_TO_PORT_FRAME_OFFSET: Record<string, number> = {
+  '1': 0,   // João Franco – default PLAYER
+  '2': 0,   // Otto Baynes – default PLAYER
+  '3': 0,   // Catalina Erantzo – default PLAYER
+  '4': 0,   // Ernst von Bohr – default PLAYER
+  '5': 0,   // Pietro Conti – default PLAYER
+  '6': 16,  // Ali Vezas – use MAN sprite block (frame 16)
+};

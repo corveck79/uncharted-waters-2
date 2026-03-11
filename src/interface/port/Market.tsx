@@ -5,12 +5,14 @@ import { VendorMessageBoxType } from '../quest/getMessageBoxes';
 import BuildingMenu from '../common/BuildingMenu';
 import BuildingWrapper from './BuildingWrapper';
 import InputNumber from '../common/InputNumber';
-import { buyGoods, sellGoods } from '../../state/actionsPort';
+import { buyGoods, sellGoods, investInMarket, INVEST_COST_PER_POINT } from '../../state/actionsPort';
 import {
   getGold,
   getCargoCapacityLeft,
   getCurrentMarketId,
+  getCurrentPortId,
   getPlayerGoods,
+  getPortInvestment,
 } from '../../state/selectors';
 import { getPlayerFleet } from '../../state/selectorsFleet';
 import {
@@ -24,7 +26,7 @@ import {
 const marketOptions = ['Buy Goods', 'Sell Goods', 'Invest', 'Market Rate'] as const;
 type MarketOptions = typeof marketOptions[number];
 
-const marketDisabledOptions: MarketOptions[] = ['Invest'];
+const marketDisabledOptions: MarketOptions[] = [];
 
 export default function Market() {
   const { selectOption, next, back, reset, state } =
@@ -217,6 +219,51 @@ export default function Market() {
               setSelectedGoodsId(undefined);
               back(2);
             },
+          },
+        };
+      }
+    }
+  }
+
+  if (option === 'Invest') {
+    const portId = getCurrentPortId();
+    if (!portId) {
+      vendorMessage = { body: 'No port to invest in.', acknowledge: back };
+    } else if (!getGold()) {
+      vendorMessage = {
+        body: "You don't have any gold to invest.",
+        acknowledge: back,
+      };
+    } else {
+      const gold = getGold();
+      const investment = getPortInvestment(portId);
+
+      if (step === 0) {
+        vendorMessage = {
+          body: `Current economy boost: ${investment.economy}. Each ${INVEST_COST_PER_POINT} gold invested boosts economy by 1. How much will you invest? (max ${gold})`,
+        };
+
+        children = (
+          <InputNumber
+            limit={gold}
+            onComplete={(amount) => {
+              tradeQty.current = amount;
+              next();
+            }}
+            onCancel={back}
+          />
+        );
+      }
+
+      if (step === 1) {
+        vendorMessage = {
+          body: `Invest ${tradeQty.current} gold for +${Math.floor(tradeQty.current / INVEST_COST_PER_POINT)} economy boost?`,
+          confirm: {
+            yes: () => {
+              investInMarket(tradeQty.current);
+              back(1);
+            },
+            no: () => back(1),
           },
         };
       }

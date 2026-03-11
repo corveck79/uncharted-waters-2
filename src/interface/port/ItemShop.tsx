@@ -8,8 +8,9 @@ import {
   getItemShopStock,
   getPlayerItem,
   getGold,
+  canBuyItem,
 } from '../../state/selectors';
-import { itemData, ItemId } from '../../data/itemData';
+import { itemData, ItemId, isSellable } from '../../data/itemData';
 import ItemShopItemBox from '../ItemShopItemBox';
 import {
   buyItem,
@@ -20,7 +21,8 @@ import {
 const itemShopOptions = ['Buy', 'Sell'] as const;
 type ItemShopOptions = typeof itemShopOptions[number];
 
-// TODO haggling, items that cannot be sold, equipment limit
+type HaggleOutcome = 'success' | 'fail' | 'noGold' | undefined;
+
 export default function ItemShop() {
   const { selectOption, next, back, reset, state } =
     useBuilding<ItemShopOptions>();
@@ -30,6 +32,9 @@ export default function ItemShop() {
 
   const hasSold = useRef(false);
   const [selectedItemI, setSelectedItemI] = useState<number>();
+
+  const [haggleOutcome, setHaggleOutcome] = useState<HaggleOutcome>();
+  const haggledPrice = useRef(0);
 
   const { option, step } = state;
 
@@ -54,19 +59,27 @@ export default function ItemShop() {
   let children: ReactNode;
 
   if (option === 'Buy') {
-    if (getGold()) {
+    if (!getGold()) {
+      vendorMessage = {
+        body: 'It seems you have no gold.',
+        acknowledge: back,
+      };
+    } else {
       vendorMessage = {
         body: !hasBought.current
-          ? 'I’m sure you’ll find something you like.'
+          ? 'I\u2019m sure you\u2019ll find something you like.'
           : 'Are you interested in anything else?',
       };
+
+      const stock = getItemShopStock();
 
       menu2 = (
         <BuildingMenu
           title="Item"
-          options={getItemShopStock().map((item) => ({
+          options={stock.map((item) => ({
             label: item.name,
             value: item.id,
+            disabled: !canBuyItem(item.id),
           }))}
           onSelect={(itemId) => {
             setSelectedItemId(itemId);
@@ -77,59 +90,110 @@ export default function ItemShop() {
           hidden={step !== 0}
         />
       );
-    } else {
-      vendorMessage = {
-        body: 'It seems you have no gold.',
-        acknowledge: back,
-      };
     }
 
     if (selectedItemId) {
+      const item = itemData[selectedItemId];
+      children = <ItemShopItemBox item={item} />;
+
       if (step === 1) {
-        const item = itemData[selectedItemId];
-
         vendorMessage = {
-          body: `The ${item.name} will cost you ${item.price} gold pieces.`,
-          confirm: {
-            yes: () => {
-              if (!buyItem(selectedItemId)) {
-                next();
-                return;
-              }
-
-              hasBought.current = true;
-
-              if (getGold()) {
-                back();
-              } else {
-                reset();
-              }
-            },
-            no: () => {
-              setSelectedItemId(undefined);
-              back();
-            },
-          },
+          body: `The ${item.name} will cost you ${item.price} gold.`,
         };
 
-        children = <ItemShopItemBox item={item} />;
+        menu2 = (
+          <BuildingMenu
+            title="Options"
+            options={[
+              { label: 'Buy', value: 'buy' },
+              { label: 'Haggle', value: 'haggle' },
+              { label: 'Cancel', value: 'cancel' },
+            ]}
+            onSelect={(action) => {
+              if (action === 'buy') {
+                if (!buyItem(selectedItemId)) {
+                  setHaggleOutcome('noGold');
+                  next();
+                  return;
+                }
+                hasBought.current = true;
+                setSelectedItemId(undefined);
+                if (getGold()) back();
+                else reset();
+              } else if (action === 'haggle') {
+                const success = Math.random() < 0.5;
+                if (success) {
+                  haggledPrice.current = Math.floor(item.price * 0.8);
+                  setHaggleOutcome('success');
+                } else {
+                  setHaggleOutcome('fail');
+                }
+                next();
+              } else {
+                setSelectedItemId(undefined);
+                back();
+              }
+            }}
+            onCancel={() => {
+              setSelectedItemId(undefined);
+              back();
+            }}
+            level2
+          />
+        );
       }
 
       if (step === 2) {
-        vendorMessage = {
-          body: `I’m afraid you don’t have enough gold.`,
-          acknowledge: () => back(2),
-        };
+        if (haggleOutcome === 'noGold') {
+          vendorMessage = {
+            body: "I\u2019m afraid you don\u2019t have enough gold.",
+            acknowledge: () => {
+              setHaggleOutcome(undefined);
+              back(2);
+            },
+          };
+        } else if (haggleOutcome === 'success') {
+          vendorMessage = {
+            body: `How about ${haggledPrice.current} gold? That\u2019s as low as I can go.`,
+            confirm: {
+              yes: () => {
+                buyItem(selectedItemId, false, haggledPrice.current);
+                hasBought.current = true;
+                setSelectedItemId(undefined);
+                setHaggleOutcome(undefined);
+                if (getGold()) back(2);
+                else reset();
+              },
+              no: () => {
+                setHaggleOutcome(undefined);
+                back();
+              },
+            },
+          };
+        } else if (haggleOutcome === 'fail') {
+          vendorMessage = {
+            body: `${item.price} gold is the best I can offer. Take it or leave it.`,
+            acknowledge: () => {
+              setHaggleOutcome(undefined);
+              back();
+            },
+          };
+        }
       }
     }
   }
 
   if (option === 'Sell') {
-    const items = getPlayerItems();
+    const allItems = getPlayerItems();
+    const sellableItems = allItems
+      .map((item, originalIndex) => ({ ...item, originalIndex }))
+      .filter((item) => isSellable(item.id));
 
-    if (!items.length) {
+    if (!sellableItems.length) {
       vendorMessage = {
-        body: 'You don’t have any items.',
+        body: !allItems.length
+          ? "You don\u2019t have any items."
+          : "I don\u2019t buy items of that sort.",
         acknowledge: back,
       };
     } else {
@@ -142,9 +206,9 @@ export default function ItemShop() {
       menu2 = (
         <BuildingMenu
           title="Item"
-          options={items.map((item, i) => ({
+          options={sellableItems.map((item) => ({
             label: item.name,
-            value: i,
+            value: item.originalIndex,
           }))}
           onSelect={(i) => {
             setSelectedItemI(i);
@@ -162,9 +226,9 @@ export default function ItemShop() {
         const item = getPlayerItem(selectedItemI);
 
         vendorMessage = {
-          body: `I’d like to take that ${
+          body: `I\u2019d like to take that ${
             item.name
-          } off your hands. I’ll take it for ${
+          } off your hands. I\u2019ll take it for ${
             item.price * ITEM_SHOP_SELL_MULTIPLIER
           } gold pieces.`,
           confirm: {
@@ -172,7 +236,8 @@ export default function ItemShop() {
               sellItem(selectedItemI);
               hasSold.current = true;
 
-              if (getPlayerItems().length) {
+              const remaining = getPlayerItems().filter((it) => isSellable(it.id));
+              if (remaining.length) {
                 back();
               } else {
                 reset();

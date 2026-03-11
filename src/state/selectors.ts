@@ -7,6 +7,7 @@ import { getPlayerFleet } from './selectorsFleet';
 import createMap from '../map';
 import { applyPositionDelta } from '../utils';
 import getSailor from '../data/sailorData';
+import { playerCharacters } from '../data/playerCharacters';
 import { provisions } from '../game/world/fleets';
 import { shipData } from '../data/shipData';
 import { shipyardsToShips } from '../data/portShipyardData';
@@ -38,7 +39,8 @@ export const positionAdjacentToPort = (portId: string) => {
     .find((p) => !map.collisionAt(p));
 
   if (!positionNoCollision) {
-    throw Error('No available tile was found adjacent to port');
+    console.warn('No adjacent tile found for port', portId, '- falling back to port position');
+    return position;
   }
 
   return positionNoCollision;
@@ -73,8 +75,13 @@ export const getDebt = () => state.debt;
 
 export const getRepayAmount = () => Math.min(state.debt, state.gold);
 
-export const getAtMosque = () =>
-  state.portId && getPortData(state.portId).tileset === 2;
+export const getAtMosque = () => {
+  if (!state.portId) return false;
+  const port = getPortData(state.portId);
+  if (port.tileset !== 2) return false;
+  // Only non-Muslims are blocked from entering the mosque
+  return getPlayerReligion() !== 'muslim';
+};
 
 const secretItemShopOpen = () => {
   const timeOfDay = getTimeOfDay();
@@ -177,6 +184,12 @@ export const getFirstMateId = () =>
   state.mates.find(({ role }) => role === 'firstMate')?.sailorId ?? '32';
 
 export const getPlayerSailorId = () => state.mates[0]?.sailorId ?? '1';
+
+export const getPlayerReligion = (): string => {
+  const sailorId = getPlayerSailorId();
+  const char = playerCharacters.find(c => c.sailorId === sailorId);
+  return char?.religion ?? 'christian';
+};
 
 export const isLisbon = () => state.portId === '1';
 

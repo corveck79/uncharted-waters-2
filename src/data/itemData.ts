@@ -644,6 +644,19 @@ export const itemData = asInferredKeysWithValue<Item>()({
 
 export type ItemId = keyof typeof itemData;
 
+export const WEAPON_CATEGORY_IDS = ['1', '2', '3', '4'] as const;
+export const ARMOR_CATEGORY_ID = '7';
+export const TREASURE_CATEGORY_ID = '12';
+
+export const isWeapon = (itemId: ItemId) =>
+  (WEAPON_CATEGORY_IDS as readonly string[]).includes(itemData[itemId].categoryId);
+
+export const isArmor = (itemId: ItemId) =>
+  itemData[itemId].categoryId === ARMOR_CATEGORY_ID;
+
+export const isSellable = (itemId: ItemId) =>
+  itemData[itemId].categoryId !== TREASURE_CATEGORY_ID;
+
 export const getAttackOrDefenseDisplay = (
   rating: number,
   categoryId: CategoryId,

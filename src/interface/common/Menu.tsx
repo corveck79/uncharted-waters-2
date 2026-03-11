@@ -1,9 +1,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/interactive-supports-focus */
 
-// TODO solve issue with multiple Menus being visible (Item Popover while in a building)
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { classNames } from '../interfaceUtils';
 import useCancel from '../port/hooks/useCancel';
@@ -23,6 +21,20 @@ interface Props<T> {
   center?: boolean;
 }
 
+/*
+  When multiple Menus are mounted and visible at the same time (e.g. a
+  BuildingMenu beneath an open Item Popover), only the topmost one should
+  respond to keyboard input.  We track all active (non-hidden) menus in a
+  module-level Set and give each Menu a stable numeric ID.  The handler
+  below is a no-op unless this Menu's ID is the highest (most recently
+  registered) one in the set.
+*/
+const activeMenus = new Set<number>();
+let menuIdCounter = 0;
+
+const isTopMenu = (id: number) =>
+  activeMenus.size > 0 && Math.max(...activeMenus) === id;
+
 export default function Menu<T extends number | string>({
   options,
   onSelect,
@@ -32,6 +44,19 @@ export default function Menu<T extends number | string>({
   center = false,
 }: Props<T>) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const idRef = useRef(menuIdCounter++);
+
+  // Register / unregister in the active-menu set whenever visibility changes.
+  useEffect(() => {
+    if (!hidden) {
+      activeMenus.add(idRef.current);
+    } else {
+      activeMenus.delete(idRef.current);
+    }
+    return () => {
+      activeMenus.delete(idRef.current);
+    };
+  }, [hidden]);
 
   useCancel(!hidden ? onCancel : undefined);
 
@@ -47,6 +72,11 @@ export default function Menu<T extends number | string>({
     }
 
     const onKeydown = (e: KeyboardEvent) => {
+      // Only the topmost visible Menu reacts to keyboard input.
+      if (!isTopMenu(idRef.current)) {
+        return;
+      }
+
       const pressedKey = e.key.toLowerCase();
 
       if (['e', 'enter'].includes(pressedKey)) {

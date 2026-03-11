@@ -2,6 +2,8 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { GenerateSW } = require('workbox-webpack-plugin');
 
 // used for hosting on johan.li/uncharted-waters-2
 const PUBLIC_PATH = process.env.PUBLIC_PATH || '/';
@@ -20,6 +22,27 @@ module.exports = (env, argv) => {
     resolve: {
       extensions: ['.tsx', '.ts', '.js'],
     },
+    optimization: {
+      splitChunks: {
+        chunks: 'all',
+        maxSize: 200 * 1024, // 200 KB per chunk voor JS/CSS
+        cacheGroups: {
+          defaultVendors: {
+            test: /[\\/]node_modules[\\/]/,
+            priority: -10,
+            reuseExistingChunk: true,
+          },
+          default: {
+            minChunks: 2,
+            priority: -20,
+            reuseExistingChunk: true,
+          },
+        },
+      },
+      runtimeChunk: {
+        name: 'runtime',
+      },
+    },
     module: {
       rules: [
         {
@@ -34,6 +57,9 @@ module.exports = (env, argv) => {
         {
           test: /\.(ogg|mp3|png|wasm)$/,
           type: 'asset/resource',
+          generator: {
+            filename: 'assets/[name]-[contenthash][ext]',
+          },
         },
       ],
     },
@@ -53,6 +79,13 @@ module.exports = (env, argv) => {
       new MiniCssExtractPlugin({
         filename: '[name]-[contenthash].css',
       }),
+      new GenerateSW({
+        clientsClaim: true,
+        skipWaiting: true,
+        // Precache all webpack-emitted assets (JS, CSS, images, audio, wasm).
+        // The revision hash is derived from each file's content hash.
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB (for .wasm / .ogg)
+      }),
     );
   } else {
     config.mode = 'development';
@@ -62,7 +95,7 @@ module.exports = (env, argv) => {
 
     config.devServer = {
       static: false,
-      port: process.env.PORT || 8080,
+      port: process.env.PORT || 3000,
     };
 
     config.module.rules[0].options = {

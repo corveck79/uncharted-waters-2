@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useState, useRef } from 'react';
 
 import BuildingMenu from '../../common/BuildingMenu';
 import {
@@ -7,6 +7,10 @@ import {
   getAvailableSailorId,
   SELL_SHIP_MODIFIER,
   sellShipNumber,
+  remodelShip,
+  getRemodelCost,
+  investInShipyard,
+  INVEST_COST_PER_POINT,
 } from '../../../state/actionsPort';
 import ShipyardShipBox from './ShipyardShipBox';
 import { shipData } from '../../../data/shipData';
@@ -18,7 +22,15 @@ import BuildingWrapper from '../BuildingWrapper';
 import useBuilding from '../hooks/useBuilding';
 import { VendorMessageBoxType } from '../../quest/getMessageBoxes';
 import ShipyardShipInputName from './ShipyardShipInputName';
-import { canAfford, getUsedShips, getNewShipsAvailable } from '../../../state/selectors';
+import InputNumber from '../../common/InputNumber';
+import {
+  canAfford,
+  getUsedShips,
+  getNewShipsAvailable,
+  getGold,
+  getCurrentPortId,
+  getPortInvestment,
+} from '../../../state/selectors';
 
 const shipyardOptions = [
   'New Ship',
@@ -30,10 +42,7 @@ const shipyardOptions = [
 ] as const;
 type ShipyardOptions = typeof shipyardOptions[number];
 
-const shipyardDisabledOptions: ShipyardOptions[] = [
-  'Remodel',
-  'Invest',
-];
+const shipyardDisabledOptions: ShipyardOptions[] = [];
 
 export default function Shipyard() {
   const { selectOption, back, next, state } = useBuilding<ShipyardOptions>();
@@ -43,6 +52,11 @@ export default function Shipyard() {
 
   const [selectedShipNumberToSell, setSelectedShipNumberToSell] =
     useState<number>();
+
+  const investQty = useRef(0);
+
+  const [remodelShipNumber, setRemodelShipNumber] = useState<number>();
+  const [remodelTargetId, setRemodelTargetId] = useState<string>();
 
   const { option, step } = state;
 
@@ -310,6 +324,159 @@ export default function Shipyard() {
         children = (
           <ShipyardShipBox shipId={ship.id} customShipName={ship.name} />
         );
+      }
+    }
+  }
+
+  if (option === 'Remodel') {
+    const fleet = getPlayerFleet();
+    const availableShips = getNewShipsAvailable();
+
+    if (!availableShips.length) {
+      vendorMessage = {
+        body: "We don't have the equipment for remodeling here.",
+        acknowledge: back,
+      };
+    } else if (fleet.length === 0) {
+      vendorMessage = {
+        body: "You don't have any ships to remodel.",
+        acknowledge: back,
+      };
+    } else {
+      if (step === 0) {
+        vendorMessage = { body: 'Which ship would you like to remodel?' };
+        menu2 = (
+          <BuildingMenu
+            title="Your Ships"
+            options={fleet.map((ship, i) => ({
+              label: ship.name,
+              value: i,
+            }))}
+            onSelect={(value) => {
+              setRemodelShipNumber(value);
+              next();
+            }}
+            onCancel={back}
+            level2
+            hidden={step !== 0}
+          />
+        );
+      }
+
+      if (step === 1 && remodelShipNumber !== undefined) {
+        const currentShip = fleet[remodelShipNumber];
+        const targets = availableShips.filter(
+          ({ shipId }) => shipId !== currentShip.id,
+        );
+
+        if (!targets.length) {
+          vendorMessage = {
+            body: "There's nothing better we can remodel this ship into.",
+            acknowledge: () => {
+              setRemodelShipNumber(undefined);
+              back();
+            },
+          };
+        } else {
+          vendorMessage = { body: 'What would you like to remodel it into?' };
+          menu2 = (
+            <BuildingMenu
+              title="Target Model"
+              options={targets.map(({ shipId }) => ({
+                label: `${shipData[shipId].name} (${getRemodelCost(shipId)} gold)`,
+                value: shipId,
+              }))}
+              onSelect={(shipId) => {
+                setRemodelTargetId(shipId);
+                next();
+              }}
+              onCancel={() => {
+                setRemodelShipNumber(undefined);
+                back();
+              }}
+              level2
+              hidden={step !== 1}
+            />
+          );
+        }
+      }
+
+      if (step === 2 && remodelShipNumber !== undefined && remodelTargetId) {
+        const cost = getRemodelCost(remodelTargetId);
+        children = <ShipyardShipBox shipId={remodelTargetId} />;
+
+        if (!canAfford(cost)) {
+          vendorMessage = {
+            body: "You don't have enough gold for that remodel.",
+            acknowledge: () => {
+              setRemodelShipNumber(undefined);
+              setRemodelTargetId(undefined);
+              back(2);
+            },
+          };
+        } else {
+          vendorMessage = {
+            body: `Remodeling to a ${shipData[remodelTargetId].name} will cost ${cost} gold. Shall I proceed?`,
+            confirm: {
+              yes: () => {
+                remodelShip(remodelShipNumber, remodelTargetId);
+                setRemodelShipNumber(undefined);
+                setRemodelTargetId(undefined);
+                back(2);
+              },
+              no: () => {
+                setRemodelShipNumber(undefined);
+                setRemodelTargetId(undefined);
+                back(2);
+              },
+            },
+          };
+        }
+      }
+    }
+  }
+
+  if (option === 'Invest') {
+    const portId = getCurrentPortId();
+    if (!portId) {
+      vendorMessage = { body: 'No shipyard to invest in.', acknowledge: back };
+    } else if (!getGold()) {
+      vendorMessage = {
+        body: "You don't have any gold to invest.",
+        acknowledge: back,
+      };
+    } else {
+      const gold = getGold();
+      const investment = getPortInvestment(portId);
+
+      if (step === 0) {
+        vendorMessage = {
+          body: `Current industry boost: ${investment.industry}. Each ${INVEST_COST_PER_POINT} gold invested boosts industry by 1, unlocking better ships. How much will you invest? (max ${gold})`,
+        };
+
+        children = (
+          <InputNumber
+            limit={gold}
+            onComplete={(amount) => {
+              investQty.current = amount;
+              next();
+            }}
+            onCancel={back}
+          />
+        );
+      }
+
+      if (step === 1) {
+        vendorMessage = {
+          body: `Invest ${investQty.current} gold for +${Math.floor(investQty.current / INVEST_COST_PER_POINT)} industry boost?`,
+          confirm: {
+            yes: () => {
+              investInShipyard(investQty.current);
+              back(1);
+            },
+            no: () => back(1),
+          },
+        };
       }
     }
   }

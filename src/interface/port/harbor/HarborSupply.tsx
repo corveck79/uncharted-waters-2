@@ -37,10 +37,9 @@ export default function HarborSupply({ back }: Props) {
               const full = loadPercent === 100;
 
               return (
-                // TODO give ships an ID; current key isn’t fool-proof
                 <div
                   className="flex items-center mt-2"
-                  key={`${ship.id}-${ship.name}`}
+                  key={ship.uid ?? `${ship.id}-${ship.name}`}
                 >
                   <div className="w-64 text-2xl">{ship.name}</div>
                   <div className="w-24">

@@ -1,17 +1,21 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 import useBuilding from './hooks/useBuilding';
 import { VendorMessageBoxType } from '../quest/getMessageBoxes';
 import BuildingMenu from '../common/BuildingMenu';
 import BuildingWrapper from './BuildingWrapper';
-import { receiveGold } from '../../state/actionsPort';
+import { receiveGold, defect, receiveShipReward, getAvailableSailorId } from '../../state/actionsPort';
 import { getPortData } from '../../game/port/portUtils';
+import { getPlayerNationalityIndex, getNewShipsAvailable } from '../../state/selectors';
+import { shipData } from '../../data/shipData';
+import ShipyardShipBox from './shipyard/ShipyardShipBox';
 import state from '../../state/state';
 
 const palaceOptions = ['Meet Ruler', 'Defect', 'Gold', 'Ship'] as const;
 type PalaceOptions = typeof palaceOptions[number];
 
-const nationalities = ['Portugal', 'England', 'Spain', 'Holland', 'Italy', 'Ottoman'];
+// Order matches portData allegiances array: [Portugal, Spain, Ottoman, England, Italy, Holland]
+const nationalities = ['Portugal', 'Spain', 'Ottoman', 'England', 'Italy', 'Holland'];
 
 const getDominantNationality = (allegiances: number[]) => {
   const maxIdx = allegiances.indexOf(Math.max(...allegiances));
@@ -33,6 +37,8 @@ export default function Palace() {
   let vendorMessage: VendorMessageBoxType = {
     body: `This is the Palace of ${portName}. The ruler of ${nationality} grants you an audience.`,
   };
+
+  let children: ReactNode;
 
   const menu = (
     <BuildingMenu
@@ -56,10 +62,34 @@ export default function Palace() {
   }
 
   if (option === 'Defect') {
-    vendorMessage = {
-      body: 'You must prove your loyalty to another nation before defecting. Earn renown in foreign lands first.',
-      acknowledge: back,
-    };
+    const allegiances = port && !port.isSupplyPort ? port.allegiances : [];
+    const maxAllegiance = allegiances.length ? Math.max(...allegiances) : 0;
+    const portNatIdx = maxAllegiance >= 50 ? allegiances.indexOf(maxAllegiance) : -1;
+    const playerNatIdx = getPlayerNationalityIndex();
+
+    if (portNatIdx === -1) {
+      vendorMessage = {
+        body: 'There is no powerful ruler here to pledge your loyalty to.',
+        acknowledge: back,
+      };
+    } else if (portNatIdx === playerNatIdx) {
+      vendorMessage = {
+        body: `You are already loyal to ${nationality}. There is nothing to defect to here.`,
+        acknowledge: back,
+      };
+    } else {
+      const portNationality = nationalities[portNatIdx];
+      vendorMessage = {
+        body: `Do you wish to renounce your previous allegiance and pledge your loyalty to ${portNationality}?`,
+        confirm: {
+          yes: () => {
+            defect(portNatIdx);
+            back();
+          },
+          no: back,
+        },
+      };
+    }
   }
 
   if (option === 'Gold') {
@@ -82,10 +112,47 @@ export default function Palace() {
   }
 
   if (option === 'Ship') {
-    vendorMessage = {
-      body: 'The ruler has no ships to offer at this time. Continue your voyages and return when you have proven your worth.',
-      acknowledge: back,
-    };
+    const portId = state.portId;
+    const hasReceivedShip = portId && (state.shipRewardsReceived || []).includes(portId);
+
+    if (hasReceivedShip) {
+      vendorMessage = {
+        body: 'The ruler has already bestowed you a vessel. Godspeed on your voyages.',
+        acknowledge: back,
+      };
+    } else if (!state.quests.length) {
+      vendorMessage = {
+        body: 'You have not yet proven yourself. Complete missions for the guild and return.',
+        acknowledge: back,
+      };
+    } else if (!getAvailableSailorId()) {
+      vendorMessage = {
+        body: 'You have no available sailors to captain another vessel.',
+        acknowledge: back,
+      };
+    } else {
+      const availableShips = getNewShipsAvailable();
+      if (!availableShips.length) {
+        vendorMessage = {
+          body: 'The ruler has no ships to offer at this port.',
+          acknowledge: back,
+        };
+      } else {
+        const rewardShipId = availableShips[0].shipId;
+        const rewardShip = shipData[rewardShipId];
+        children = <ShipyardShipBox shipId={rewardShipId} />;
+        vendorMessage = {
+          body: `In recognition of your service, the ruler bestows upon you a ${rewardShip.name}!`,
+          confirm: {
+            yes: () => {
+              receiveShipReward(portId!, rewardShipId, rewardShip.name);
+              back();
+            },
+            no: back,
+          },
+        };
+      }
+    }
   }
 
   if (step === -1) {
@@ -100,6 +167,8 @@ export default function Palace() {
       buildingId="6"
       vendorMessageBox={vendorMessage}
       menu={menu}
-    />
+    >
+      {children}
+    </BuildingWrapper>
   );
 }

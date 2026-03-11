@@ -4,14 +4,15 @@ import {
   getRegionOrIfSupplyPort,
   getPortData,
 } from '../../game/port/portUtils';
+import { getPortInvestment } from '../../state/selectors';
 
 interface Props {
   portId: string;
 }
 
-// TODO Investments
 export default function PortInfo({ portId }: Props) {
   const port = getPortData(portId);
+  const investment = getPortInvestment(portId);
 
   let economy = 0;
   let industry = 0;
@@ -39,7 +40,7 @@ export default function PortInfo({ portId }: Props) {
         </div>
         <div className="flex justify-between items-baseline">
           <span className="text-xs text-[#666]">↳ Invest.</span>
-          <span className="text-sm text-[#888]">0</span>
+          <span className="text-sm text-[#888]">+{investment.economy}</span>
         </div>
 
         <div
@@ -51,7 +52,7 @@ export default function PortInfo({ portId }: Props) {
         </div>
         <div className="flex justify-between items-baseline">
           <span className="text-xs text-[#666]">↳ Invest.</span>
-          <span className="text-sm text-[#888]">0</span>
+          <span className="text-sm text-[#888]">+{investment.industry}</span>
         </div>
 
         <div
