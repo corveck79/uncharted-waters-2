@@ -25,7 +25,11 @@ const createPortCharacters = (
   // Determine which port character type to use based on the selected sailor
   const sailorId = getPlayerSailorId();
   const SAILOR_TO_PORT_TYPE: Record<string, typeof portCharacterType[number]> = {
-    '6': 'MAN', // Ali Vezas uses MAN sprite instead of default PLAYER
+    '2': 'OTTO',   // Otto Baynes – green-scheme recolor
+    '3': 'CATALINA', // Catalina Erantzo – red-scheme WOMAN recolor
+    '4': 'ERNST',  // Ernst von Bohr – pink/magenta-scheme recolor
+    '5': 'PIETRO', // Pietro Conti – warm red-scheme recolor
+    '6': 'ALI',    // Ali Vezas – green-scheme MAN recolor
   };
   const playerType = SAILOR_TO_PORT_TYPE[sailorId] || 'PLAYER';
 

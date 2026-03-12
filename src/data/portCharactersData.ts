@@ -1,6 +1,6 @@
 import type { Position } from '../types';
 
-const portCharacterType = [
+export const portCharacterType = [
   'PLAYER',
   'WOMAN',
   'MAN',
@@ -8,6 +8,11 @@ const portCharacterType = [
   'DOG',
   'GUARD',
   'BEGGAR',
+  'OTTO',
+  'ERNST',
+  'PIETRO',
+  'CATALINA',
+  'ALI',
 ] as const;
 type PortCharacterType = typeof portCharacterType[number];
 
@@ -145,7 +150,20 @@ const FRAMES_PER_CHARACTER = 8;
 const FRAMES_PER_STATIONARY_CHARACTER = 2;
 const STATIONARY_FROM_I = 3;
 
+// Sailor-specific types appended after the base 32 frames (1024px)
+const SAILOR_TYPE_START_FRAMES: Partial<Record<PortCharacterType, number>> = {
+  'OTTO':     32, // frames 32-39 (green-scheme PLAYER recolor)
+  'ERNST':    40, // frames 40-47 (pink/magenta-scheme PLAYER recolor)
+  'PIETRO':   48, // frames 48-55 (warm red-scheme PLAYER recolor)
+  'CATALINA': 56, // frames 56-63 (red-scheme WOMAN recolor)
+  'ALI':      64, // frames 64-71 (green-scheme MAN recolor)
+};
+
 export const getStartFrame = (type: PortCharacterType) => {
+  if (type in SAILOR_TYPE_START_FRAMES) {
+    return SAILOR_TYPE_START_FRAMES[type]!;
+  }
+
   const i = portCharacterType.indexOf(type);
 
   if (i === -1) {
@@ -162,12 +180,3 @@ export const getStartFrame = (type: PortCharacterType) => {
   );
 };
 
-// Mapping: sailorId → frame offset for port character sprites
-export const SAILOR_ID_TO_PORT_FRAME_OFFSET: Record<string, number> = {
-  '1': 0,   // João Franco – default PLAYER
-  '2': 0,   // Otto Baynes – default PLAYER
-  '3': 0,   // Catalina Erantzo – default PLAYER
-  '4': 0,   // Ernst von Bohr – default PLAYER
-  '5': 0,   // Pietro Conti – default PLAYER
-  '6': 16,  // Ali Vezas – use MAN sprite block (frame 16)
-};
