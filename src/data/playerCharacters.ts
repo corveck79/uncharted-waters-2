@@ -113,11 +113,20 @@ export function getStartingState(character: PlayerCharacter) {
     fleetId += 1;
   }
 
+  const startingShip = {
+    uid: genUid(),
+    id: '6', // Caravela Latina
+    name: `${character.name}'s Ship`,
+    crew: 30,
+    cargo: [] as object[],
+    durability: 30,
+  };
+
   return {
     portId: character.startingPortId,
     buildingId: null,
     timePassed: START_TIME_PASSED,
-    fleets: { '1': { position: undefined, ships: [] }, ...npcFleets },
+    fleets: { '1': { position: undefined, ships: [startingShip] }, ...npcFleets },
     dayAtSea: 0,
     gold: character.startingGold,
     quests: [],
@@ -126,5 +135,7 @@ export function getStartingState(character: PlayerCharacter) {
     debt: character.startingDebt,
     items: [],
     mates: [{ sailorId: character.sailorId, role: null }],
+    fame: { trade: 0, piracy: 0, adventure: 0 },
+    friendship: { portugal: 0, spain: 0, turkey: 0, england: 0, italy: 0, holland: 0 },
   };
 }

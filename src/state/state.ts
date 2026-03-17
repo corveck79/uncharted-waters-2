@@ -4,6 +4,8 @@ import type { Port } from '../game/port/port';
 import type { World } from '../game/world/world';
 import type { QuestId } from '../interface/quest/questData';
 import { ItemId } from '../data/itemData';
+import type { DiscoveryId } from '../data/discoveryData';
+import type { BattleState } from '../game/world/seaBattle';
 
 export type Stage = 'world' | 'port' | 'building';
 
@@ -54,6 +56,12 @@ export interface State {
   portInvestments: { [portId: string]: { economy: number; industry: number } };
   nationalityIndex?: number; // overrides sailorId-derived nationality after defecting
   shipRewardsReceived?: string[]; // portIds where ruler gave a ship
+  goldRewardsReceived?: string[]; // portIds where ruler gave gold (once per port)
+  fame: { trade: number; piracy: number; adventure: number };
+  friendship: { portugal: number; spain: number; turkey: number; england: number; italy: number; holland: number };
+  discoveries: DiscoveryId[];
+  battle: BattleState | null;
+  guildQuest?: { discoveryId: string; rewardGold: number };
 }
 
 export const SAVED_STATE_KEY = 'savedState';
@@ -67,6 +75,9 @@ const state = {
   buildingId: null,
   timePassed: START_TIME_PASSED,
   fleets,
+  wind: { direction: 0, speed: 3 },
+  current: { direction: 0, speed: 0 },
+  playerFleet: { direction: 0, speed: 0 },
   dayAtSea: 0,
   gold: 0,
   quests: [] as QuestId[],
@@ -76,6 +87,10 @@ const state = {
   items: [],
   luckBoost: 0,
   portInvestments: {},
+  fame: { trade: 0, piracy: 0, adventure: 0 },
+  friendship: { portugal: 0, spain: 0, turkey: 0, england: 0, italy: 0, holland: 0 },
+  discoveries: [] as DiscoveryId[],
+  battle: null,
   mates: [
     {
       sailorId: '1',

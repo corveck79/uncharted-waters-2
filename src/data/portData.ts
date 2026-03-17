@@ -16,6 +16,7 @@ export interface RegularPort {
   };
   marketId: MarketId;
   industryId: IndustryId;
+  ships?: string[];
   buildings: BuildingLocations;
   tileset: number;
 }
@@ -40,6 +41,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '1',
     industryId: '1',
+    ships: ['1', '19', '6', '8', '20', '9', '10'],
     buildings: {
       '1': {
         x: 41,
@@ -99,11 +101,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 100, 0, 0, 0, 0],
     regionId: '1',
     itemShop: {
-      regular: ['25', '7', '4'],
+      regular: ['25', '7', '4', '14'],
       secret: '14',
     },
     marketId: '1',
     industryId: '1',
+    ships: ['1', '19', '6', '8', '20', '9', '10', '11'],
     buildings: {
       '1': {
         x: 65,
@@ -167,11 +170,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 100, 0, 0, 0],
     regionId: '1',
     itemShop: {
-      regular: ['25', '17', '21'],
+      regular: ['25', '17', '21', '8'],
       secret: '8',
     },
     marketId: '5',
     industryId: '6',
+    ships: ['19', '6', '20', '9', '12', '21', '10'],
     buildings: {
       '1': {
         x: 63,
@@ -239,6 +243,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '1',
     industryId: '1',
+    ships: ['1', '19', '6', '8', '20', '9', '10', '11'],
     buildings: {
       '1': {
         x: 56,
@@ -298,6 +303,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '4',
     industryId: '6',
+    ships: ['19', '6', '20', '9', '12', '21', '10'],
     buildings: {
       '1': {
         x: 50,
@@ -346,6 +352,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '1',
     marketId: '4',
     industryId: '6',
+    ships: ['19', '6', '20', '9', '12', '21', '10'],
     buildings: {
       '1': {
         x: 36,
@@ -389,6 +396,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '1',
     industryId: '1',
+    ships: ['1', '19', '6', '8', '20', '9', '10', '11'],
     buildings: {
       '1': {
         x: 47,
@@ -444,11 +452,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 0, 0],
     regionId: '1',
     itemShop: {
-      regular: ['5', '63'],
+      regular: ['5', '63', '6'],
       secret: '6',
     },
     marketId: '3',
     industryId: '4',
+    ships: ['2', '19', '7', '20', '9', '13', '22', '11'],
     buildings: {
       '1': {
         x: 73,
@@ -508,6 +517,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '3',
     industryId: '5',
+    ships: ['19', '5', '6', '4', '20', '9', '21', '10'],
     buildings: {
       '1': {
         x: 43,
@@ -571,6 +581,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '3',
     industryId: '5',
+    ships: ['19', '5', '6', '4', '20', '9', '21', '10'],
     buildings: {
       '1': {
         x: 58,
@@ -630,11 +641,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 100, 0],
     regionId: '1',
     itemShop: {
-      regular: ['5', '17', '42'],
+      regular: ['5', '17', '42', '76'],
       secret: '76',
     },
     marketId: '3',
     industryId: '5',
+    ships: ['19', '5', '6', '4', '20', '9', '21', '10'],
     buildings: {
       '1': {
         x: 44,
@@ -690,11 +702,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 100, 0],
     regionId: '1',
     itemShop: {
-      regular: ['2', '44'],
+      regular: ['2', '44', '40'],
       secret: '40',
     },
     marketId: '3',
     industryId: '5',
+    ships: ['19', '5', '6', '4', '20', '9', '21', '10'],
     buildings: {
       '1': {
         x: 40,
@@ -747,6 +760,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '1',
     marketId: '3',
     industryId: '1',
+    ships: ['1', '19', '6', '8', '20', '9', '10', '11'],
     buildings: {
       '1': {
         x: 53,
@@ -794,11 +808,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 100, 0],
     regionId: '1',
     itemShop: {
-      regular: ['18', '22', '5'],
+      regular: ['18', '22', '5', '69'],
       secret: '69',
     },
     marketId: '3',
     industryId: '5',
+    ships: ['19', '5', '6', '4', '20', '9', '21', '10'],
     buildings: {
       '1': {
         x: 75,
@@ -862,6 +877,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '3',
     industryId: '5',
+    ships: ['19', '5', '6', '4', '20', '9', '21', '10'],
     buildings: {
       '1': {
         x: 54,
@@ -910,6 +926,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '1',
     marketId: '3',
     industryId: '5',
+    ships: ['19', '5', '6', '4', '20', '9', '21', '10'],
     buildings: {
       '1': {
         x: 25,
@@ -953,11 +970,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 0, 0],
     regionId: '1',
     itemShop: {
-      regular: ['16', '44', '56'],
+      regular: ['16', '44', '56', '23'],
       secret: '23',
     },
     marketId: '3',
     industryId: '5',
+    ships: ['19', '5', '6', '4', '20', '9', '21', '10'],
     buildings: {
       '1': {
         x: 41,
@@ -1013,11 +1031,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 0, 0],
     regionId: '1',
     itemShop: {
-      regular: ['10'],
+      regular: ['10', '36'],
       secret: '36',
     },
     marketId: '5',
     industryId: '5',
+    ships: ['19', '5', '6', '4', '20', '9', '21', '10'],
     buildings: {
       '1': {
         x: 75,
@@ -1061,11 +1080,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 100, 0, 0, 0],
     regionId: '1',
     itemShop: {
-      regular: ['19', '22', '42'],
+      regular: ['19', '22', '42', '8'],
       secret: '8',
     },
     marketId: '5',
     industryId: '6',
+    ships: ['19', '6', '20', '9', '12', '21', '10'],
     buildings: {
       '1': {
         x: 80,
@@ -1126,6 +1146,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '1',
     marketId: '5',
     industryId: '6',
+    ships: ['19', '6', '20', '9', '12', '21', '10'],
     buildings: {
       '1': {
         x: 85,
@@ -1173,6 +1194,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '5',
     industryId: '6',
+    ships: ['19', '6', '20', '9', '12', '21', '10'],
     buildings: {
       '1': {
         x: 71,
@@ -1229,6 +1251,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '1',
     marketId: '3',
     industryId: '6',
+    ships: ['19', '6', '20', '9', '12', '21', '10'],
     buildings: {
       '1': {
         x: 57,
@@ -1268,11 +1291,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 90, 0, 0, 0],
     regionId: '1',
     itemShop: {
-      regular: ['7', '17', '25'],
+      regular: ['7', '17', '25', '38'],
       secret: '38',
     },
     marketId: '4',
     industryId: '6',
+    ships: ['19', '6', '20', '9', '12', '21', '10'],
     buildings: {
       '1': {
         x: 64,
@@ -1321,6 +1345,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '1',
     marketId: '5',
     industryId: '6',
+    ships: ['19', '6', '20', '9', '12', '21', '10'],
     buildings: {
       '1': {
         x: 61,
@@ -1368,11 +1393,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 20, 0, 0, 0],
     regionId: '1',
     itemShop: {
-      regular: ['1'],
+      regular: ['1', '37'],
       secret: '37',
     },
     marketId: '5',
     industryId: '6',
+    ships: ['19', '6', '20', '9', '12', '21', '10'],
     buildings: {
       '1': {
         x: 62,
@@ -1428,6 +1454,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '5',
     industryId: '6',
+    ships: ['19', '6', '20', '9', '12', '21', '10'],
     buildings: {
       '1': {
         x: 51,
@@ -1480,6 +1507,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '1',
     marketId: '4',
     industryId: '1',
+    ships: ['1', '19', '6', '8', '20', '9', '10', '11'],
     buildings: {
       '1': {
         x: 49,
@@ -1523,6 +1551,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '2',
     industryId: '4',
+    ships: ['2', '19', '7', '20', '9', '13', '22', '11'],
     buildings: {
       '1': {
         x: 34,
@@ -1582,6 +1611,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '2',
     industryId: '4',
+    ships: ['2', '19', '7', '20', '9', '13', '22', '11'],
     buildings: {
       '1': {
         x: 49,
@@ -1633,11 +1663,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 100, 0, 0],
     regionId: '1',
     itemShop: {
-      regular: ['10', '25', '59'],
+      regular: ['10', '25', '59', '22'],
       secret: '22',
     },
     marketId: '2',
     industryId: '2',
+    ships: ['7', '9', '10'],
     buildings: {
       '1': {
         x: 50,
@@ -1697,11 +1728,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 100, 0, 0],
     regionId: '1',
     itemShop: {
-      regular: ['11', '17'],
+      regular: ['11', '17', '15'],
       secret: '15',
     },
     marketId: '2',
     industryId: '2',
+    ships: ['7', '9', '10', '11', '14', '15', '16'],
     buildings: {
       '1': {
         x: 40,
@@ -1749,11 +1781,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 93, 0, 0],
     regionId: '1',
     itemShop: {
-      regular: ['1', '11'],
+      regular: ['1', '11', '15'],
       secret: '15',
     },
     marketId: '2',
     industryId: '2',
+    ships: ['7', '9', '10', '11', '14', '15', '16'],
     buildings: {
       '1': {
         x: 28,
@@ -1805,11 +1838,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 0, 100],
     regionId: '1',
     itemShop: {
-      regular: ['3', '42', '53'],
+      regular: ['3', '42', '53', '41'],
       secret: '41',
     },
     marketId: '2',
     industryId: '3',
+    ships: ['2', '6', '9', '10', '11', '15', '17'],
     buildings: {
       '1': {
         x: 34,
@@ -1869,11 +1903,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 0, 100],
     regionId: '1',
     itemShop: {
-      regular: ['25', '22', '23'],
+      regular: ['25', '22', '23', '24'],
       secret: '24',
     },
     marketId: '2',
     industryId: '3',
+    ships: ['2', '6', '9', '10'],
     buildings: {
       '1': {
         x: 47,
@@ -1933,11 +1968,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 0, 98],
     regionId: '1',
     itemShop: {
-      regular: ['18', '19', '20'],
+      regular: ['18', '19', '20', '79'],
       secret: '79',
     },
     marketId: '2',
     industryId: '4',
+    ships: ['2', '19', '7', '20', '9', '13', '22', '11'],
     buildings: {
       '1': {
         x: 34,
@@ -2001,6 +2037,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '2',
     industryId: '3',
+    ships: ['2', '6', '9', '10', '11', '15', '17'],
     buildings: {
       '1': {
         x: 61,
@@ -2057,6 +2094,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '1',
     marketId: '2',
     industryId: '4',
+    ships: ['2', '19', '7', '20', '9', '13', '22', '11'],
     buildings: {
       '1': {
         x: 69,
@@ -2096,11 +2134,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 85, 0, 0],
     regionId: '1',
     itemShop: {
-      regular: ['1', '2'],
+      regular: ['1', '2', '14'],
       secret: '14',
     },
     marketId: '2',
     industryId: '4',
+    ships: ['2', '19', '7', '20', '9', '13', '22', '11'],
     buildings: {
       '1': {
         x: 55,
@@ -2156,11 +2195,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 0, 85],
     regionId: '1',
     itemShop: {
-      regular: ['16', '3', '6'],
+      regular: ['16', '3', '6', '13'],
       secret: '13',
     },
     marketId: '2',
     industryId: '4',
+    ships: ['2', '19', '7', '20', '9', '13', '22', '11'],
     buildings: {
       '1': {
         x: 32,
@@ -2212,11 +2252,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 0, 90],
     regionId: '1',
     itemShop: {
-      regular: ['17', '54'],
+      regular: ['17', '54', '39'],
       secret: '39',
     },
     marketId: '2',
     industryId: '4',
+    ships: ['2', '19', '7', '20', '9', '13', '22', '11'],
     buildings: {
       '1': {
         x: 27,
@@ -2273,6 +2314,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '1',
     marketId: '2',
     industryId: '4',
+    ships: ['2', '19', '7', '20', '9', '13', '22', '11'],
     buildings: {
       '1': {
         x: 63,
@@ -2321,6 +2363,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '1',
     marketId: '2',
     industryId: '4',
+    ships: ['2', '19', '7', '20', '9', '13', '22', '11'],
     buildings: {
       '1': {
         x: 86,
@@ -2368,6 +2411,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '8',
     industryId: '11',
+    ships: ['8', '13', '9', '10', '11'],
     buildings: {
       '1': {
         x: 40,
@@ -2419,6 +2463,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '8',
     industryId: '11',
+    ships: ['8', '13', '9', '10', '11'],
     buildings: {
       '1': {
         x: 65,
@@ -2471,6 +2516,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '2',
     marketId: '7',
     industryId: '11',
+    ships: ['8', '13', '9', '10', '11'],
     buildings: {
       '1': {
         x: 43,
@@ -2518,11 +2564,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 0, 0],
     regionId: '2',
     itemShop: {
-      regular: ['1'],
+      regular: ['1', '67'],
       secret: '67',
     },
     marketId: '8',
     industryId: '11',
+    ships: ['8', '13', '9', '10', '11'],
     buildings: {
       '1': {
         x: 52,
@@ -2574,6 +2621,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '7',
     industryId: '11',
+    ships: ['8', '13', '9', '10', '11'],
     buildings: {
       '1': {
         x: 39,
@@ -2622,6 +2670,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '2',
     marketId: '7',
     industryId: '11',
+    ships: ['8', '13', '9', '10', '11'],
     buildings: {
       '1': {
         x: 32,
@@ -2669,6 +2718,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '7',
     industryId: '11',
+    ships: ['8', '13', '9', '10', '11'],
     buildings: {
       '1': {
         x: 49,
@@ -2725,6 +2775,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '2',
     marketId: '7',
     industryId: '11',
+    ships: ['8', '13', '9', '10', '11'],
     buildings: {
       '1': {
         x: 45,
@@ -2772,6 +2823,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '7',
     industryId: '11',
+    ships: ['8', '13', '9', '10', '11'],
     buildings: {
       '1': {
         x: 58,
@@ -2828,6 +2880,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '2',
     marketId: '7',
     industryId: '11',
+    ships: ['8', '13', '9', '10', '11'],
     buildings: {
       '1': {
         x: 62,
@@ -2875,11 +2928,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [100, 0, 0, 0, 0, 0],
     regionId: '2',
     itemShop: {
-      regular: ['1', '20'],
+      regular: ['1', '20', '75'],
       secret: '75',
     },
     marketId: '8',
     industryId: '11',
+    ships: ['8', '13', '9', '10', '11'],
     buildings: {
       '1': {
         x: 51,
@@ -2931,11 +2985,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [90, 0, 0, 0, 0, 0],
     regionId: '2',
     itemShop: {
-      regular: ['56'],
+      regular: ['56', '66'],
       secret: '66',
     },
     marketId: '8',
     industryId: '11',
+    ships: ['8', '13', '9', '10', '11'],
     buildings: {
       '1': {
         x: 42,
@@ -2988,6 +3043,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '2',
     marketId: '8',
     industryId: '11',
+    ships: ['8', '13', '9', '10', '11'],
     buildings: {
       '1': {
         x: 51,
@@ -3035,6 +3091,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '7',
     industryId: '11',
+    ships: ['8', '13', '9', '10', '11'],
     buildings: {
       '1': {
         x: 48,
@@ -3087,6 +3144,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '2',
     marketId: '8',
     industryId: '11',
+    ships: ['8', '13', '9', '10', '11'],
     buildings: {
       '1': {
         x: 44,
@@ -3127,6 +3185,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '3',
     marketId: '6',
     industryId: '8',
+    ships: ['19', '7', '9', '10'],
     buildings: {
       '1': {
         x: 39,
@@ -3175,6 +3234,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '3',
     marketId: '6',
     industryId: '8',
+    ships: ['19', '7', '9', '10'],
     buildings: {
       '1': {
         x: 42,
@@ -3222,11 +3282,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [100, 0, 0, 0, 0, 0],
     regionId: '3',
     itemShop: {
-      regular: ['1', '25'],
+      regular: ['1', '25', '70'],
       secret: '70',
     },
     marketId: '6',
     industryId: '8',
+    ships: ['19', '7', '9', '10'],
     buildings: {
       '1': {
         x: 47,
@@ -3279,6 +3340,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '3',
     marketId: '6',
     industryId: '8',
+    ships: ['19', '7', '9', '10'],
     buildings: {
       '1': {
         x: 49,
@@ -3323,6 +3385,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '3',
     marketId: '6',
     industryId: '8',
+    ships: ['19', '7', '9', '10'],
     buildings: {
       '1': {
         x: 62,
@@ -3374,6 +3437,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '6',
     industryId: '8',
+    ships: ['19', '7', '9', '10'],
     buildings: {
       '1': {
         x: 53,
@@ -3426,6 +3490,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '3',
     marketId: '6',
     industryId: '8',
+    ships: ['19', '7', '9', '10'],
     buildings: {
       '1': {
         x: 37,
@@ -3469,11 +3534,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 0, 0],
     regionId: '3',
     itemShop: {
-      regular: ['65', '66', '62'],
+      regular: ['65', '66', '62', '77'],
       secret: '77',
     },
     marketId: '6',
     industryId: '8',
+    ships: ['19', '7', '9', '10'],
     buildings: {
       '1': {
         x: 77,
@@ -3526,6 +3592,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '3',
     marketId: '6',
     industryId: '8',
+    ships: ['19', '7', '9', '10'],
     buildings: {
       '1': {
         x: 32,
@@ -3570,6 +3637,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '4',
     marketId: '9',
     industryId: '8',
+    ships: ['19', '7', '9', '10'],
     buildings: {
       '1': {
         x: 34,
@@ -3618,6 +3686,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '4',
     marketId: '9',
     industryId: '8',
+    ships: ['19', '7', '9', '10'],
     buildings: {
       '1': {
         x: 51,
@@ -3662,6 +3731,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '4',
     marketId: '9',
     industryId: '8',
+    ships: ['19', '7', '9', '10'],
     buildings: {
       '1': {
         x: 55,
@@ -3701,11 +3771,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [90, 0, 0, 0, 0, 0],
     regionId: '4',
     itemShop: {
-      regular: ['68', '51', '53'],
+      regular: ['68', '51', '53', '55'],
       secret: '55',
     },
     marketId: '9',
     industryId: '8',
+    ships: ['19', '7', '9', '10'],
     buildings: {
       '1': {
         x: 50,
@@ -3761,11 +3832,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 0, 0],
     regionId: '4',
     itemShop: {
-      regular: ['42', '66'],
+      regular: ['42', '66', '64'],
       secret: '64',
     },
     marketId: '9',
     industryId: '8',
+    ships: ['19', '7', '9', '10'],
     buildings: {
       '1': {
         x: 59,
@@ -3818,6 +3890,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '4',
     marketId: '9',
     industryId: '8',
+    ships: ['19', '7', '9', '10'],
     buildings: {
       '1': {
         x: 51,
@@ -3862,6 +3935,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '5',
     marketId: '10',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 60,
@@ -3906,6 +3980,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '5',
     marketId: '10',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 84,
@@ -3957,6 +4032,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '10',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 49,
@@ -4016,6 +4092,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '10',
     industryId: '6',
+    ships: ['19', '6', '20', '9', '12', '21', '10'],
     buildings: {
       '1': {
         x: 39,
@@ -4076,6 +4153,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '5',
     marketId: '10',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 45,
@@ -4127,6 +4205,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '10',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 48,
@@ -4187,6 +4266,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '5',
     marketId: '10',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 50,
@@ -4231,6 +4311,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '5',
     marketId: '10',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 61,
@@ -4283,6 +4364,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '5',
     marketId: '10',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 42,
@@ -4331,6 +4413,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '6',
     marketId: '11',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 48,
@@ -4371,6 +4454,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '6',
     marketId: '11',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 42,
@@ -4426,6 +4510,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '11',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 50,
@@ -4482,6 +4567,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '7',
     marketId: '12',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 64,
@@ -4529,6 +4615,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '11',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 48,
@@ -4585,6 +4672,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '7',
     marketId: '12',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 51,
@@ -4629,6 +4717,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '7',
     marketId: '12',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 51,
@@ -4673,6 +4762,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '7',
     marketId: '12',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 43,
@@ -4717,6 +4807,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '7',
     marketId: '12',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 51,
@@ -4757,6 +4848,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '7',
     marketId: '12',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 62,
@@ -4797,6 +4889,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '7',
     marketId: '12',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 51,
@@ -4840,11 +4933,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 0, 0],
     regionId: '6',
     itemShop: {
-      regular: ['57', '42', '7'],
+      regular: ['57', '42', '7', '78'],
       secret: '78',
     },
     marketId: '11',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 59,
@@ -4901,6 +4995,7 @@ export const regularPorts: RegularPort[] = [
     regionId: '7',
     marketId: '12',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 46,
@@ -4944,11 +5039,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 0, 0],
     regionId: '8',
     itemShop: {
-      regular: ['26', '44', '43'],
+      regular: ['26', '44', '43', '12'],
       secret: '12',
     },
     marketId: '13',
     industryId: '9',
+    ships: ['18'],
     buildings: {
       '1': {
         x: 45,
@@ -5004,11 +5100,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 0, 0],
     regionId: '8',
     itemShop: {
-      regular: ['58', '57', '52'],
+      regular: ['58', '57', '52', '61'],
       secret: '61',
     },
     marketId: '13',
     industryId: '9',
+    ships: ['18'],
     buildings: {
       '1': {
         x: 38,
@@ -5068,6 +5165,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '13',
     industryId: '7',
+    ships: ['19', '3', '12'],
     buildings: {
       '1': {
         x: 82,
@@ -5111,11 +5209,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 0, 0],
     regionId: '8',
     itemShop: {
-      regular: ['58', '51', '52'],
+      regular: ['58', '51', '52', '12'],
       secret: '12',
     },
     marketId: '13',
     industryId: '9',
+    ships: ['18'],
     buildings: {
       '1': {
         x: 72,
@@ -5171,11 +5270,12 @@ export const regularPorts: RegularPort[] = [
     allegiances: [0, 0, 0, 0, 0, 0],
     regionId: '8',
     itemShop: {
-      regular: ['61', '26', '9'],
+      regular: ['61', '26', '9', '74'],
       secret: '74',
     },
     marketId: '13',
     industryId: '10',
+    ships: ['25', '24', '23'],
     buildings: {
       '1': {
         x: 32,
@@ -5231,6 +5331,7 @@ export const regularPorts: RegularPort[] = [
     },
     marketId: '13',
     industryId: '10',
+    ships: ['25', '24', '23'],
     buildings: {
       '1': {
         x: 41,

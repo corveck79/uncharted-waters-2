@@ -219,7 +219,7 @@ export const itemData = asInferredKeysWithValue<Item>()({
     name: 'Sextant',
     description:
       'A high precision instrument used for celestial navigation. It measures longitude and latitude.',
-    price: 8000,
+    price: 10000,
     imageSlice: 16,
     rating: 2,
     categoryId: '8',
@@ -228,7 +228,7 @@ export const itemData = asInferredKeysWithValue<Item>()({
     name: 'Theodolite',
     description:
       'The most precise and reliable instrument used for celestial navigation. It measures longitude and latitude.',
-    price: 12000,
+    price: 15000,
     imageSlice: 17,
     rating: 1,
     categoryId: '8',
@@ -255,7 +255,7 @@ export const itemData = asInferredKeysWithValue<Item>()({
     name: 'Cat',
     description:
       'Not only does a cat make a nice pet, but it’ll keep your ship rat-free!',
-    price: 2000,
+    price: 2500,
     imageSlice: 20,
     rating: 1,
     categoryId: '9',
@@ -389,7 +389,7 @@ export const itemData = asInferredKeysWithValue<Item>()({
     name: 'Rat Poison',
     description:
       'A poison to get rid of rats on a ship. Those pesky animals will feast on your precious food if you don’t have a way to get rid of them.',
-    price: 500,
+    price: 1000,
     imageSlice: 21,
     rating: 1,
     categoryId: '10',
@@ -617,7 +617,7 @@ export const itemData = asInferredKeysWithValue<Item>()({
     name: 'Crusader Sword',
     description:
       'A special sword with razor-like sharpness made by the renowned swordsmith, Michelangelo.',
-    price: 380000,
+    price: 360000,
     imageSlice: 4,
     rating: 40,
     categoryId: '2',

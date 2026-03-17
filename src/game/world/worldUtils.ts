@@ -18,6 +18,7 @@ export const calculateDestination = (
   yDelta: number,
   multiplier: number,
   collisionAt: (position: Position) => boolean,
+  narrow = false, // skip fractional-overlap checks (for narrow straits)
 ) => {
   const destination = {
     x: position.x + xDelta * multiplier,
@@ -29,11 +30,18 @@ export const calculateDestination = (
     const y = Math.floor(position.y);
 
     const upperOrMiddleCollision = collisionAt({ x: xNext, y });
-    const lowerCollision =
+    const lowerCollision = narrow ? false :
       position.y % 1 === 0 ? false : collisionAt({ x: xNext, y: y + 1 });
     const collision = upperOrMiddleCollision || lowerCollision;
 
     if (!collision) {
+      return destination;
+    }
+
+    // In narrow mode, just stop at the wall — no wall-sliding redirects
+    // which can push the ship sideways into adjacent walls in tight channels.
+    if (narrow) {
+      destination.x = Math.min(destination.x, xNext - 1);
       return destination;
     }
 
@@ -81,11 +89,16 @@ export const calculateDestination = (
     const y = Math.floor(position.y);
 
     const upperOrMiddleCollision = collisionAt({ x: xNext, y });
-    const lowerCollision =
+    const lowerCollision = narrow ? false :
       position.y % 1 === 0 ? false : collisionAt({ x: xNext, y: y + 1 });
     const collision = upperOrMiddleCollision || lowerCollision;
 
     if (!collision) {
+      return destination;
+    }
+
+    if (narrow) {
+      destination.x = Math.max(destination.x, xNext + 1);
       return destination;
     }
 
@@ -133,11 +146,16 @@ export const calculateDestination = (
     const x = Math.floor(position.x);
 
     const leftOrMiddleCollision = collisionAt({ x, y: yNext });
-    const rightCollision =
+    const rightCollision = narrow ? false :
       position.x % 1 === 0 ? false : collisionAt({ x: x + 1, y: yNext });
     const collision = leftOrMiddleCollision || rightCollision;
 
     if (!collision) {
+      return destination;
+    }
+
+    if (narrow) {
+      destination.y = Math.max(destination.y, yNext + 1);
       return destination;
     }
 
@@ -182,11 +200,16 @@ export const calculateDestination = (
     const x = Math.floor(position.x);
 
     const leftOrMiddleCollision = collisionAt({ x, y: yNext });
-    const rightCollision =
+    const rightCollision = narrow ? false :
       position.x % 1 === 0 ? false : collisionAt({ x: x + 1, y: yNext });
     const collision = leftOrMiddleCollision || rightCollision;
 
     if (!collision) {
+      return destination;
+    }
+
+    if (narrow) {
+      destination.y = Math.min(destination.y, yNext - 1);
       return destination;
     }
 

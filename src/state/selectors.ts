@@ -12,6 +12,7 @@ import { provisions } from '../game/world/fleets';
 import { shipData } from '../data/shipData';
 import { shipyardsToShips } from '../data/portShipyardData';
 import type { GoodsId } from '../data/goodsData';
+import { discoveryData, allDiscoveryIds, type DiscoveryId, DISCOVERY_DETECTION_RADIUS } from '../data/discoveryData';
 
 export const getTimeOfDay = () => state.timePassed % 1440;
 
@@ -64,6 +65,10 @@ export const getUsedShips = () => {
 };
 
 export const getGold = () => state.gold;
+export const getGoldCoins = () => state.gold % 10000;
+export const getGoldIngots = () => Math.floor(state.gold / 10000);
+export const getFame = () => state.fame ?? { trade: 0, piracy: 0, adventure: 0 };
+export const getFriendship = () => state.friendship ?? { portugal: 0, spain: 0, turkey: 0, england: 0, italy: 0, holland: 0 };
 
 export const getSavings = () => state.savings;
 
@@ -136,8 +141,10 @@ export const getMates = () =>
     ...getSailor(mate.sailorId),
   }));
 
-export const getCaptain = (shipI: Number) => {
-  const mate = state.mates.find(({ role }) => role === shipI);
+export const getCaptain = (shipI: number) => {
+  // Ship 0 (flagship) captain is the mate with role === null (Navigator of flagship)
+  const roleToFind = shipI === 0 ? null : shipI;
+  const mate = state.mates.find(({ role }) => role === roleToFind);
 
   if (!mate) {
     throw Error('No captain was found for the provided ship');
@@ -181,7 +188,7 @@ export const getRoleDisplay = (role: Role) => {
 };
 
 export const getFirstMateId = () =>
-  state.mates.find(({ role }) => role === 'firstMate')?.sailorId ?? '32';
+  state.mates.find(({ role }) => role === 'firstMate')?.sailorId ?? state.mates[0]?.sailorId ?? '1';
 
 export const getPlayerSailorId = () => state.mates[0]?.sailorId ?? '1';
 
@@ -253,8 +260,17 @@ export const getNewShipsAvailable = () => {
   if (!state.portId) return [];
   const port = getPortData(state.portId);
   if (port.isSupplyPort) return [];
-  const { industryId } = port;
   const industry = getEffectiveIndustry(state.portId);
+
+  // Use per-port ships list if available
+  if ((port as any).ships && (port as any).ships.length > 0) {
+    return (port as any).ships
+      .map((shipId: string) => ({ shipId, industryRequirement: shipData[shipId]?.industryRequirement ?? 0 }))
+      .filter((s: any) => s.industryRequirement <= industry);
+  }
+
+  // Fall back to industryId group
+  const { industryId } = port;
   return (shipyardsToShips[industryId] || []).filter(
     (ship) => ship.industryRequirement <= industry,
   );
@@ -289,4 +305,50 @@ export const isPortBlockaded = (): boolean => {
 
   const dominantIdx = allegiances.indexOf(maxAllegiance);
   return dominantIdx !== getPlayerNationalityIndex();
+};
+
+const ALLEGIANCE_TO_NATION: { [key: number]: string } = {
+  0: 'Portugal', 1: 'Spain', 2: 'Ottoman Empire', 3: 'England', 4: 'Italy', 5: 'Holland',
+};
+
+const ALLEGIANCE_TO_FRIENDSHIP_KEY: { [key: number]: keyof typeof state.friendship } = {
+  0: 'portugal', 1: 'spain', 2: 'turkey', 3: 'england', 4: 'italy', 5: 'holland',
+};
+
+export const getBlockadeInfo = (): { nation: string; friendly: boolean } | null => {
+  if (!isPortBlockaded()) return null;
+  const port = getPortData(state.portId!);
+  const maxAllegiance = Math.max(...port.allegiances);
+  const dominantIdx = port.allegiances.indexOf(maxAllegiance);
+  const nation = ALLEGIANCE_TO_NATION[dominantIdx] ?? 'Unknown';
+  const friendshipKey = ALLEGIANCE_TO_FRIENDSHIP_KEY[dominantIdx];
+  const friendly = friendshipKey ? (state.friendship?.[friendshipKey] ?? 0) >= 50 : false;
+  return { nation, friendly };
+};
+
+export const getDiscoveries = (): DiscoveryId[] => state.discoveries ?? [];
+
+export const hasDiscovery = (id: DiscoveryId): boolean =>
+  (state.discoveries ?? []).includes(id);
+
+export const getDiscoveryCount = (): number => (state.discoveries ?? []).length;
+
+export const getTotalDiscoveries = (): number => allDiscoveryIds.length;
+
+/** Returns the id of a discovery item the player is close enough to trigger, or null. */
+export const getNearbyUndiscoveredItem = (): DiscoveryId | null => {
+  const worldPos = state.world?.playerPosition;
+  if (!worldPos) return null;
+  const discovered = state.discoveries ?? [];
+
+  for (const id of allDiscoveryIds) {
+    if (discovered.includes(id)) continue;
+    const item = discoveryData[id];
+    const dx = worldPos.x - item.worldX;
+    const dy = worldPos.y - item.worldY;
+    if (Math.sqrt(dx * dx + dy * dy) <= DISCOVERY_DETECTION_RADIUS) {
+      return id;
+    }
+  }
+  return null;
 };

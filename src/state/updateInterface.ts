@@ -1,4 +1,5 @@
 import type { State, ProvisionsType } from './state';
+import type { BattleState } from '../game/world/seaBattle';
 
 interface UpdateInterface {
   general: (
@@ -10,6 +11,8 @@ interface UpdateInterface {
   playerFleetDirection: (direction: number) => void;
   playerFleetSpeed: (speed: number) => void;
   fade: (onComplete: () => void) => void;
+  notification: (title: string, body: string) => void;
+  battle: (battle: BattleState | null) => void;
 }
 
 const updateInterface = {} as UpdateInterface;

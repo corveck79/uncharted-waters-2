@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import Shipyard from './shipyard/Shipyard';
 import BuildingMenu from '../common/BuildingMenu';
@@ -15,6 +15,10 @@ import Market from './Market';
 import Palace from './Palace';
 import Guild from './Guild';
 import FortuneTeller from './FortuneTeller';
+import BlockadeGuard from './BlockadeGuard';
+import { isPortBlockaded, getBlockadeInfo } from '../../state/selectors';
+
+const BLOCKADED_BUILDINGS = ['6', '7'];
 
 interface Props {
   buildingId: string;
@@ -22,6 +26,19 @@ interface Props {
 
 export default function Building({ buildingId }: Props) {
   const { options } = buildings[buildingId];
+  const [blockadeCleared, setBlockadeCleared] = useState(false);
+
+  if (!blockadeCleared && BLOCKADED_BUILDINGS.includes(buildingId) && isPortBlockaded()) {
+    const info = getBlockadeInfo()!;
+    return (
+      <BlockadeGuard
+        buildingId={buildingId}
+        nation={info.nation}
+        friendly={info.friendly}
+        onClear={() => setBlockadeCleared(true)}
+      />
+    );
+  }
 
   if (buildingId === '1') {
     return <Market />;

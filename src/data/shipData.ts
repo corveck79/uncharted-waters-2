@@ -1,3 +1,23 @@
+import type { HullType } from '../game/world/fleets';
+
+// Hull material data — durabilityBonus values are estimated from ROM analysis
+// (6 hull types confirmed: Teak, Cedar, Beech, Oak, Copper, Iron)
+export const hullData: Record<HullType, { name: string; durabilityBonus: number }> = {
+  teak:   { name: 'Teak',   durabilityBonus: 0  },
+  cedar:  { name: 'Cedar',  durabilityBonus: 5  },
+  beech:  { name: 'Beech',  durabilityBonus: 10 },
+  oak:    { name: 'Oak',    durabilityBonus: 15 },
+  copper: { name: 'Copper', durabilityBonus: 20 },
+  iron:   { name: 'Iron',   durabilityBonus: 25 },
+};
+
+// Each gun slot uses this many cargo units (configGuns vs usedGuns delta)
+export const GUN_CARGO_RATIO = 2;
+// Cost per cargo unit changed during remodel
+export const REMODEL_COST_PER_CARGO = 20;
+// Cost per durability point from hull upgrade
+export const HULL_COST_PER_DURABILITY = 100;
+
 interface ShipWindFactorMap {
   [key: string]: [number, number, number, number, number];
 }
@@ -228,7 +248,7 @@ export const shipData: ShipData = {
     maximumCrew: 300,
     minimumCrew: 25,
     capacity: 600,
-    maximumGuns: 40,
+    maximumGuns: 30,
     sailType: 4,
     basePrice: 44000,
     description:
@@ -281,7 +301,7 @@ export const shipData: ShipData = {
     capacity: 650,
     maximumGuns: 70,
     sailType: 5,
-    basePrice: 224000,
+    basePrice: 231000,
     description:
       'We are proud of this great ship. It combines the storage capacity of a galleon with the mobility of a caravel. A true work of art!',
   },
@@ -298,7 +318,7 @@ export const shipData: ShipData = {
     capacity: 1000,
     maximumGuns: 120,
     sailType: 3,
-    basePrice: 300000,
+    basePrice: 195000,
     description:
       'Only a few shipyards have the ability to build this ship. Ye’ll never regret buying it.',
   },
@@ -315,7 +335,7 @@ export const shipData: ShipData = {
     capacity: 1200,
     maximumGuns: 150,
     sailType: 3,
-    basePrice: 320000,
+    basePrice: 411000,
     description:
       'This is the ultimate ship, but it’s only for highly skilled navigators.',
   },
@@ -407,7 +427,7 @@ export const shipData: ShipData = {
     usedGuns: 80,
     usedCrew: 360,
     industryRequirement: 1000,
-    durability: 90,
+    durability: 110,
     tacking: 80,
     power: 85,
     maximumCrew: 300,
@@ -415,7 +435,7 @@ export const shipData: ShipData = {
     capacity: 1100,
     maximumGuns: 100,
     sailType: 3,
-    basePrice: 140000,
+    basePrice: 211000,
     description:
       'This huge rowing ship is armored with steel, and has space for lots of guns.',
   },

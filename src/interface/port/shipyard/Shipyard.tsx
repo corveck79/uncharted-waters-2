@@ -8,9 +8,12 @@ import {
   SELL_SHIP_MODIFIER,
   sellShipNumber,
   remodelShip,
+  renameShip,
   getRemodelCost,
+  getEffectiveCargo,
   investInShipyard,
   INVEST_COST_PER_POINT,
+  setFigurehead,
 } from '../../../state/actionsPort';
 import ShipyardShipBox from './ShipyardShipBox';
 import { shipData } from '../../../data/shipData';
@@ -30,7 +33,10 @@ import {
   getGold,
   getCurrentPortId,
   getPortInvestment,
+  getEffectiveIndustry,
 } from '../../../state/selectors';
+import { shipyardsToShips } from '../../../data/portShipyardData';
+import { getPortData } from '../../../game/port/portUtils';
 
 const shipyardOptions = [
   'New Ship',
@@ -56,7 +62,11 @@ export default function Shipyard() {
   const investQty = useRef(0);
 
   const [remodelShipNumber, setRemodelShipNumber] = useState<number>();
-  const [remodelTargetId, setRemodelTargetId] = useState<string>();
+  const [remodelSubOption, setRemodelSubOption] = useState<'Figurehead' | 'Guns' | 'Load Capacity' | 'Rename'>();
+  const [remodelBunks, setRemodelBunks] = useState<number>();
+  const [remodelGuns, setRemodelGuns] = useState<number>();
+  const [selectedFigurehead, setSelectedFigurehead] = useState<string>();
+  const [selectedGunType, setSelectedGunType] = useState<string>();
 
   const { option, step } = state;
 
@@ -330,107 +340,243 @@ export default function Shipyard() {
 
   if (option === 'Remodel') {
     const fleet = getPlayerFleet();
-    const availableShips = getNewShipsAvailable();
 
-    if (!availableShips.length) {
-      vendorMessage = {
-        body: "We don't have the equipment for remodeling here.",
-        acknowledge: back,
-      };
-    } else if (fleet.length === 0) {
-      vendorMessage = {
-        body: "You don't have any ships to remodel.",
-        acknowledge: back,
-      };
-    } else {
-      if (step === 0) {
-        vendorMessage = { body: 'Which ship would you like to remodel?' };
-        menu2 = (
-          <BuildingMenu
-            title="Your Ships"
-            options={fleet.map((ship, i) => ({
-              label: ship.name,
-              value: i,
-            }))}
-            onSelect={(value) => {
-              setRemodelShipNumber(value);
-              next();
-            }}
-            onCancel={back}
-            level2
-            hidden={step !== 0}
-          />
-        );
-      }
+    const resetRemodel = (steps = 0) => {
+      setRemodelShipNumber(undefined);
+      setRemodelSubOption(undefined);
+      setRemodelBunks(undefined);
+      setRemodelGuns(undefined);
+      setSelectedFigurehead(undefined);
+      setSelectedGunType(undefined);
+      back(steps);
+    };
 
-      if (step === 1 && remodelShipNumber !== undefined) {
-        const currentShip = fleet[remodelShipNumber];
-        const targets = availableShips.filter(
-          ({ shipId }) => shipId !== currentShip.id,
-        );
+    const figureheadTypes = [
+      'Sea Horse', 'Commodore', 'Unicorn', 'Lion', 'Giant Eagle',
+      'Hero', 'Neptune', 'Dragon', 'Angel', 'Goddess',
+    ];
+    const figureheadCosts: Record<string, number> = {
+      'Sea Horse':   500,
+      'Commodore':   1000,
+      'Unicorn':     2000,
+      'Lion':        3500,
+      'Giant Eagle': 6000,
+      'Hero':        10000,
+      'Neptune':     18000,
+      'Dragon':      30000,
+      'Angel':       50000,
+      'Goddess':     80000,
+    };
 
-        if (!targets.length) {
-          vendorMessage = {
-            body: "There's nothing better we can remodel this ship into.",
-            acknowledge: () => {
-              setRemodelShipNumber(undefined);
-              back();
-            },
-          };
-        } else {
-          vendorMessage = { body: 'What would you like to remodel it into?' };
+    const gunTypes = ['Cannon', 'Demi-cannon', 'Canon Pedrero', 'Culverin', 'Demi-culverin', 'Saker', 'Carronade'];
+    const gunCostsPerSlot: Record<string, number> = {
+      'Cannon':        300,
+      'Demi-cannon':   500,
+      'Canon Pedrero': 400,
+      'Culverin':      800,
+      'Demi-culverin': 650,
+      'Saker':         200,
+      'Carronade':     1000,
+    };
+
+    // step 0: select which ship
+    if (step === 0) {
+      vendorMessage = { body: 'Which ship would ye like to remodel?' };
+      menu2 = (
+        <BuildingMenu
+          title="Your Ships"
+          options={fleet.map((ship, i) => ({
+            label: ship.name,
+            value: i,
+          }))}
+          onSelect={(value) => {
+            setRemodelShipNumber(value);
+            next();
+          }}
+          onCancel={back}
+          level2
+          hidden={step !== 0}
+        />
+      );
+    }
+
+    // step 1: sub-menu — Figurehead / Guns / Load Capacity / Rename
+    if (step === 1 && remodelShipNumber !== undefined) {
+      vendorMessage = { body: 'What would ye like to change?' };
+      menu2 = (
+        <BuildingMenu
+          title="Remodel"
+          options={(['Figurehead', 'Guns', 'Load Capacity', 'Rename'] as const).map((s) => ({
+            label: s,
+            value: s,
+          }))}
+          onSelect={(sub) => {
+            setRemodelSubOption(sub);
+            next();
+          }}
+          onCancel={() => resetRemodel(1)}
+          level2
+          hidden={step !== 1}
+        />
+      );
+    }
+
+    // step 2+: branch by sub-option
+    if (step >= 2 && remodelShipNumber !== undefined && remodelSubOption) {
+      const ship = fleet[remodelShipNumber];
+      const data = shipData[ship.id];
+
+      if (remodelSubOption === 'Figurehead') {
+        if (step === 2) {
+          vendorMessage = { body: 'What type are ye interested in?' };
+          children = <ShipyardShipBox shipId={ship.id} customShipName={ship.name} />;
           menu2 = (
             <BuildingMenu
-              title="Target Model"
-              options={targets.map(({ shipId }) => ({
-                label: `${shipData[shipId].name} (${getRemodelCost(shipId)} gold)`,
-                value: shipId,
-              }))}
-              onSelect={(shipId) => {
-                setRemodelTargetId(shipId);
-                next();
-              }}
-              onCancel={() => {
-                setRemodelShipNumber(undefined);
-                back();
-              }}
+              title="Figurehead"
+              options={figureheadTypes.map((f) => ({ label: f, value: f }))}
+              onSelect={(f) => { setSelectedFigurehead(f); next(); }}
+              onCancel={() => resetRemodel(2)}
               level2
-              hidden={step !== 1}
+              hidden={step !== 2}
+            />
+          );
+        }
+        if (step === 3 && selectedFigurehead) {
+          const figureheadCost = figureheadCosts[selectedFigurehead] ?? 500;
+          children = <ShipyardShipBox shipId={ship.id} customShipName={ship.name} />;
+          if (!canAfford(figureheadCost)) {
+            vendorMessage = { body: "You don't have enough gold for that.", acknowledge: () => resetRemodel(3) };
+          } else {
+            vendorMessage = {
+              body: `A ${selectedFigurehead} figurehead will cost ${figureheadCost} gold. Is this OK?`,
+              confirm: {
+                yes: () => { setFigurehead(remodelShipNumber!, selectedFigurehead, figureheadCost); next(); },
+                no: () => resetRemodel(3),
+              },
+            };
+          }
+        }
+        if (step === 4) {
+          vendorMessage = { body: 'The new figurehead has been fitted!', acknowledge: () => resetRemodel(4) };
+        }
+      }
+
+      if (remodelSubOption === 'Guns') {
+        if (step === 2) {
+          vendorMessage = { body: 'What type are ye interested in?' };
+          children = <ShipyardShipBox shipId={ship.id} customShipName={ship.name} />;
+          menu2 = (
+            <BuildingMenu
+              title="Guns"
+              options={gunTypes.map((g) => ({ label: g, value: g }))}
+              onSelect={(g) => { setSelectedGunType(g); next(); }}
+              onCancel={() => resetRemodel(2)}
+              level2
+              hidden={step !== 2}
+            />
+          );
+        }
+        if (step === 3 && selectedGunType) {
+          const gunCostPerSlot = gunCostsPerSlot[selectedGunType] ?? 300;
+          const gunCost = data.maximumGuns * gunCostPerSlot;
+          children = <ShipyardShipBox shipId={ship.id} customShipName={ship.name} />;
+          if (!canAfford(gunCost)) {
+            vendorMessage = { body: "You don't have enough gold for that.", acknowledge: () => resetRemodel(3) };
+          } else {
+            vendorMessage = {
+              body: `Installing ${selectedGunType}s will cost ${gunCost} gold. Is this OK?`,
+              confirm: {
+                yes: () => next(),
+                no: () => resetRemodel(3),
+              },
+            };
+          }
+        }
+        if (step === 4) {
+          vendorMessage = { body: 'The new guns have been installed!', acknowledge: () => resetRemodel(4) };
+        }
+      }
+
+      if (remodelSubOption === 'Load Capacity') {
+        const currentBunks = ship.configBunks ?? data.minimumCrew;
+        const currentGuns = ship.configGuns ?? data.usedGuns;
+
+        if (step === 2) {
+          vendorMessage = {
+            body: `How many bunks for the crew? (${data.minimumCrew}–${data.maximumCrew})`,
+          };
+          children = (
+            <>
+              <ShipyardShipBox shipId={ship.id} customShipName={ship.name} />
+              <InputNumber
+                min={data.minimumCrew}
+                limit={data.maximumCrew}
+                defaultValue={currentBunks}
+                onComplete={(val) => { setRemodelBunks(val); next(); }}
+                onCancel={() => resetRemodel(2)}
+              />
+            </>
+          );
+        }
+
+        if (step === 3 && remodelBunks !== undefined) {
+          vendorMessage = {
+            body: `Make space for how many guns? (0–${data.maximumGuns})`,
+          };
+          children = (
+            <>
+              <ShipyardShipBox shipId={ship.id} customShipName={ship.name} />
+              <InputNumber
+                limit={data.maximumGuns}
+                defaultValue={currentGuns}
+                onComplete={(val) => { setRemodelGuns(val); next(); }}
+                onCancel={() => { setRemodelBunks(undefined); back(); }}
+              />
+            </>
+          );
+        }
+
+        if (step === 4 && remodelBunks !== undefined && remodelGuns !== undefined) {
+          const cost = getRemodelCost(ship.id, currentBunks, currentGuns, 'teak', remodelBunks, remodelGuns);
+          const newCargo = getEffectiveCargo(ship.id, remodelBunks, remodelGuns);
+          children = <ShipyardShipBox shipId={ship.id} customShipName={ship.name} />;
+
+          if (!canAfford(cost)) {
+            vendorMessage = {
+              body: "You don't have enough gold for that remodel.",
+              acknowledge: () => resetRemodel(4),
+            };
+          } else {
+            vendorMessage = {
+              body: `It will cost ye ${cost} gold pieces to change the cargo capacity to ${newCargo}. Is this OK?`,
+              confirm: {
+                yes: () => { remodelShip(remodelShipNumber, 'teak', remodelBunks, remodelGuns); next(); },
+                no: () => resetRemodel(4),
+              },
+            };
+          }
+        }
+
+        if (step === 5) {
+          vendorMessage = { body: 'Then give it a new name.' };
+          children = (
+            <ShipyardShipInputName
+              onSubmit={(newName) => { renameShip(remodelShipNumber, newName); resetRemodel(5); }}
+              onCancel={() => resetRemodel(5)}
             />
           );
         }
       }
 
-      if (step === 2 && remodelShipNumber !== undefined && remodelTargetId) {
-        const cost = getRemodelCost(remodelTargetId);
-        children = <ShipyardShipBox shipId={remodelTargetId} />;
-
-        if (!canAfford(cost)) {
-          vendorMessage = {
-            body: "You don't have enough gold for that remodel.",
-            acknowledge: () => {
-              setRemodelShipNumber(undefined);
-              setRemodelTargetId(undefined);
-              back(2);
-            },
-          };
-        } else {
-          vendorMessage = {
-            body: `Remodeling to a ${shipData[remodelTargetId].name} will cost ${cost} gold. Shall I proceed?`,
-            confirm: {
-              yes: () => {
-                remodelShip(remodelShipNumber, remodelTargetId);
-                setRemodelShipNumber(undefined);
-                setRemodelTargetId(undefined);
-                back(2);
-              },
-              no: () => {
-                setRemodelShipNumber(undefined);
-                setRemodelTargetId(undefined);
-                back(2);
-              },
-            },
-          };
+      if (remodelSubOption === 'Rename') {
+        if (step === 2) {
+          vendorMessage = { body: 'What shall we call her?' };
+          children = (
+            <ShipyardShipInputName
+              onSubmit={(newName) => { renameShip(remodelShipNumber, newName); resetRemodel(2); }}
+              onCancel={() => resetRemodel(2)}
+            />
+          );
         }
       }
     }
@@ -448,10 +594,18 @@ export default function Shipyard() {
     } else {
       const gold = getGold();
       const investment = getPortInvestment(portId);
+      const currentIndustry = getEffectiveIndustry(portId);
+      const portEntry = getPortData(portId);
+      const industryId = !portEntry.isSupplyPort ? portEntry.industryId : null;
+      const allShipsHere = industryId ? (shipyardsToShips[industryId] || []) : [];
+      const nextShip = allShipsHere.find((s) => s.industryRequirement > currentIndustry);
+      const nextUnlockMsg = nextShip
+        ? ` Next unlock: ${shipData[nextShip.shipId].name} — needs ${nextShip.industryRequirement - currentIndustry} more industry (${(nextShip.industryRequirement - currentIndustry) * INVEST_COST_PER_POINT} gold).`
+        : ' You have unlocked all available ships at this port.';
 
       if (step === 0) {
         vendorMessage = {
-          body: `Current industry boost: ${investment.industry}. Each ${INVEST_COST_PER_POINT} gold invested boosts industry by 1, unlocking better ships. How much will you invest? (max ${gold})`,
+          body: `Current industry boost: ${investment.industry}.${nextUnlockMsg} Each ${INVEST_COST_PER_POINT} gold = +1 industry. How much will ye invest? (max ${gold})`,
         };
 
         children = (

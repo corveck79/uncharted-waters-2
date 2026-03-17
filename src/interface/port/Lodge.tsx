@@ -5,10 +5,10 @@ import BuildingMenu from '../common/BuildingMenu';
 import BuildingWrapper from './BuildingWrapper';
 import { checkIn } from '../../state/actionsPort';
 
-const lodgeOptions = ['Check In', 'Gossip', 'Port Info'] as const;
+const lodgeOptions = ['Check In', 'Gossip'] as const;
 type LodgeOptions = typeof lodgeOptions[number];
 
-const lodgeDisabledOptions: LodgeOptions[] = ['Gossip', 'Port Info'];
+const lodgeDisabledOptions: LodgeOptions[] = ['Gossip'];
 
 export default function Lodge() {
   const { selectOption, back, state } = useBuilding<LodgeOptions>();

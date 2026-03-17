@@ -12,6 +12,8 @@ interface Props {
   onComplete: (value: number) => void;
   onCancel: () => void;
   inlined?: true;
+  min?: number;
+  defaultValue?: number;
 }
 
 export default function InputNumber({
@@ -19,8 +21,10 @@ export default function InputNumber({
   onComplete,
   onCancel,
   inlined,
+  min = 0,
+  defaultValue,
 }: Props) {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(defaultValue ?? min);
 
   useCancel(onCancel);
 
@@ -41,19 +45,19 @@ export default function InputNumber({
           )}
           type="text"
           required
-          value={value || ''}
+          value={value === 0 ? '0' : value || ''}
           onChange={(e: ChangeEvent<HTMLInputElement>) => {
             if (Number.isNaN(e.target.value)) {
               return;
             }
 
             let amount = Number(e.target.value);
-            amount = Math.max(0, amount);
+            amount = Math.max(min, amount);
             amount = Math.min(limit, amount);
 
             setValue(amount);
           }}
-          onClick={() => setValue(0)}
+          onClick={() => setValue(min)}
           autoFocus
           data-test="inputNumberInput"
         />
@@ -73,7 +77,7 @@ export default function InputNumber({
   }
 
   return (
-    <div className="absolute top-[500px] left-[96px]">
+    <div className="absolute top-[500px] left-[276px]">
       <MessageBox>
         <div className="w-[450px] text-2xl p-4">{inline}</div>
       </MessageBox>

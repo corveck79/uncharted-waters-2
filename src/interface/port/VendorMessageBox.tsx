@@ -11,7 +11,7 @@ interface Props {
 
 export default function VendorMessageBox({ buildingId, messageBox }: Props) {
   return (
-    <div className="flex" data-test="vendorMessageBox">
+    <div className="flex ml-[180px]" data-test="vendorMessageBox">
       <div className="p-4 pr-0">
         <img src={Assets.buildings(buildingId)} alt="" className="w-[272px]" />
       </div>

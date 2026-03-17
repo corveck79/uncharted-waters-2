@@ -9,7 +9,10 @@ import {
   getPlayerItem,
   getGold,
   canBuyItem,
+  getTimeOfDay,
+  getCurrentPortId,
 } from '../../state/selectors';
+import { getPortData } from '../../game/port/portUtils';
 import { itemData, ItemId, isSellable } from '../../data/itemData';
 import ItemShopItemBox from '../ItemShopItemBox';
 import {
@@ -38,8 +41,18 @@ export default function ItemShop() {
 
   const { option, step } = state;
 
+  const portId = getCurrentPortId();
+  const portEntry = portId ? getPortData(portId) : null;
+  const hasSecretItem = !!(portEntry && !portEntry.isSupplyPort && portEntry.itemShop?.secret);
+  const timeOfDay = getTimeOfDay();
+  const secretShopOpen = timeOfDay >= 120 && timeOfDay < 180;
+  const secretHint =
+    hasSecretItem && !secretShopOpen
+      ? " ...though some say I keep rarer goods for those who visit in the dead of night."
+      : '';
+
   let vendorMessage: VendorMessageBoxType = {
-    body: 'May I help you?',
+    body: `May I help you?${secretHint}`,
   };
 
   const menu: ReactNode = (

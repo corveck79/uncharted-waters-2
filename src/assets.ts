@@ -113,7 +113,13 @@ const Assets = {
   buildings: (id: string) => slice('buildings', Number(id) - 1, 136),
   // multiple items can share the same image
   items: (i: number) => slice('items', i, 48),
-  characters: (id: string) => slice('characters', Number(id) - 1, 64),
+  // characters.png uses original UW2 KAO order: João(1), Catalina(2), Otto(3), ...
+  // but remake sailorIds have Otto=2, Catalina=3 — remap to correct portrait index.
+  characters: (id: string) => {
+    const portraitOverride: Record<string, number> = { '2': 3, '3': 2 };
+    const index = (portraitOverride[id] ?? Number(id)) - 1;
+    return slice('characters', index, 64);
+  },
   indicators: (direction: number) => slice('worldIndicators', direction, 80),
   ships: (id: string) => slice('ships', Number(id) - 1, 128),
 };

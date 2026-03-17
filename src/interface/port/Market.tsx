@@ -37,6 +37,7 @@ export default function Market() {
 
   const { option, step } = state;
   const marketId = getCurrentMarketId();
+  const portId = getCurrentPortId() ?? undefined;
 
   let vendorMessage: VendorMessageBoxType = {
     body: 'Welcome to the market. What can I do for you?',
@@ -83,7 +84,7 @@ export default function Market() {
           <BuildingMenu
             title="Goods"
             options={availableGoods.map((id) => ({
-              label: `${goodsData[id].name} (${getBuyPrice(id, marketId)} gold)`,
+              label: `${goodsData[id].name} (${getBuyPrice(id, marketId, portId)} gold)`,
               value: id,
             }))}
             onSelect={(id) => {
@@ -97,7 +98,7 @@ export default function Market() {
         );
 
         if (selectedGoodsId && step === 1) {
-          const price = getBuyPrice(selectedGoodsId, marketId);
+          const price = getBuyPrice(selectedGoodsId, marketId, portId);
           const maxQty = Math.min(
             Math.floor(getGold() / price),
             capacityLeft,
@@ -133,7 +134,7 @@ export default function Market() {
         }
 
         if (selectedGoodsId && step === 2) {
-          const price = getBuyPrice(selectedGoodsId, marketId);
+          const price = getBuyPrice(selectedGoodsId, marketId, portId);
           vendorMessage = {
             body: `That'll be ${tradeQty.current * price} gold for ${tradeQty.current} units of ${goodsData[selectedGoodsId].name}. Deal?`,
             confirm: {
@@ -275,7 +276,7 @@ export default function Market() {
     const lines = availableGoods
       .map(
         (id) =>
-          `${goodsData[id].name}: Buy ${getBuyPrice(id, marketId)} / Sell ${getSellPrice(id, marketId)}`,
+          `${goodsData[id].name}: Buy ${getBuyPrice(id, marketId, portId)} / Sell ${getSellPrice(id, marketId)}`,
       )
       .join('\n');
 

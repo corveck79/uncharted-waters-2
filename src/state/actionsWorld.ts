@@ -1,9 +1,19 @@
-import state from './state';
+import state, { SAVED_STATE_KEY } from './state';
 import { portAdjacentAt } from '../game/port/portUtils';
 import createPort from '../game/port/port';
 import Input from '../input';
 import updateInterface from './updateInterface';
 import { updateGeneral } from './actionsPort';
+import { regularPorts } from '../data/portData';
+import type { Position } from '../types';
+
+const FIGUREHEAD_RANK: Record<string, number> = {
+  'Sea Horse': 1, 'Commodore': 2, 'Unicorn': 3, 'Lion': 4,
+  'Giant Eagle': 5, 'Hero': 6, 'Neptune': 7, 'Dragon': 8,
+  'Angel': 9, 'Goddess': 10,
+};
+const STORM_BASE_CHANCE = 0.10;   // 10% per day at sea
+const STORM_RANK_REDUCTION = 0.008; // 0.8% reduction per figurehead rank
 import {
   getCurrent,
   getIsSummer,
@@ -13,11 +23,31 @@ import {
 import { START_DATE } from '../constants';
 import {
   getTimeOfDay,
+  isPortBlockaded,
   positionAdjacentToPort,
   shouldUpdateWorldStatus,
 } from './selectors';
-import { Position } from '../types';
-import { regularPorts } from '../data/portData';
+import { discoveryData, type DiscoveryId } from '../data/discoveryData';
+
+// ── Auto-sail state (non-persistent, module-level) ───────────────────────────
+let _autoSailTarget: { position: Position; portId: string } | null = null;
+
+export const setAutoSailTarget = (portId: string) => {
+  const port = regularPorts[parseInt(portId, 10) - 1];
+  _autoSailTarget = { position: positionAdjacentToPort(portId), portId };
+  if (port) {
+    updateInterface.notification(
+      'Auto Sail',
+      `Setting course for ${port.name}. Steer manually to cancel.`,
+    );
+  }
+};
+
+export const clearAutoSailTarget = () => {
+  _autoSailTarget = null;
+};
+
+export const getAutoSailTarget = () => _autoSailTarget;
 
 export const dock = (position: Position) => {
   const portId = portAdjacentAt(position);
@@ -43,6 +73,14 @@ export const dock = (position: Position) => {
 
   state.dayAtSea = 0;
   updateInterface.dayAtSea(state.dayAtSea);
+
+  // Notify player when entering a blockaded port
+  if (isPortBlockaded()) {
+    updateInterface.notification(
+      'Hostile Port',
+      'This port is under foreign control. Armed soldiers patrol the streets. Proceed with caution.',
+    );
+  }
 
   return true;
 };
@@ -101,6 +139,20 @@ export const worldTimeTick = () => {
 
     state.dayAtSea += 1;
     updateInterface.dayAtSea(state.dayAtSea);
+
+    // Daily storm roll — reduced by flagship figurehead rank
+    const flagship = state.fleets['1'].ships[0];
+    if (flagship) {
+      const rank = flagship.figurehead ? (FIGUREHEAD_RANK[flagship.figurehead] ?? 0) : 0;
+      const stormChance = Math.max(0.02, STORM_BASE_CHANCE - rank * STORM_RANK_REDUCTION);
+      if (Math.random() < stormChance) {
+        flagship.durability = Math.max(0, flagship.durability - 10);
+        updateInterface.notification(
+          'Storm!',
+          'A fierce storm batters your fleet! Your flagship takes damage.',
+        );
+      }
+    }
   }
 };
 
@@ -138,6 +190,19 @@ export const setSail = () => {
 
   Input.reset();
 
+  window.localStorage.setItem(SAVED_STATE_KEY, JSON.stringify(state));
   updateGeneral();
   updateProvisions();
+};
+
+export const triggerDiscovery = (id: DiscoveryId) => {
+  if ((state.discoveries ?? []).includes(id)) return;
+  state.discoveries = [...(state.discoveries ?? []), id];
+  const item = discoveryData[id];
+  state.fame = {
+    ...state.fame,
+    adventure: (state.fame?.adventure ?? 0) + item.adventureFame,
+  };
+  window.localStorage.setItem(SAVED_STATE_KEY, JSON.stringify(state));
+  updateInterface.notification(item.name, `${item.description}\n\nAdventure fame +${item.adventureFame}.`);
 };

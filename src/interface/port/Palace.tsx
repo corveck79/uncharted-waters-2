@@ -94,16 +94,23 @@ export default function Palace() {
 
   if (option === 'Gold') {
     if (step === 0) {
-      if (!state.quests.length) {
+      const portId = state.portId;
+      const hasReceivedGold = portId && (state.goldRewardsReceived || []).includes(portId);
+      if (state.quests.length < 6) {
         vendorMessage = {
-          body: 'You have not yet proven yourself. Complete missions for the guild and return.',
+          body: 'You have not yet proven yourself. Complete more missions and return when you have earned a greater reputation.',
+          acknowledge: back,
+        };
+      } else if (hasReceivedGold) {
+        vendorMessage = {
+          body: 'You have already received the ruler\'s generosity. Seek glory elsewhere.',
           acknowledge: back,
         };
       } else {
         vendorMessage = {
           body: `In recognition of your services, the ruler rewards you with ${goldReward} gold pieces!`,
           acknowledge: () => {
-            receiveGold(goldReward);
+            receiveGold(goldReward, portId ?? undefined);
             back();
           },
         };
@@ -120,9 +127,9 @@ export default function Palace() {
         body: 'The ruler has already bestowed you a vessel. Godspeed on your voyages.',
         acknowledge: back,
       };
-    } else if (!state.quests.length) {
+    } else if (state.quests.length < 12) {
       vendorMessage = {
-        body: 'You have not yet proven yourself. Complete missions for the guild and return.',
+        body: 'You have not yet proven yourself enough to receive such a gift. Sail further, explore more, and return when you are truly worthy.',
         acknowledge: back,
       };
     } else if (!getAvailableSailorId()) {

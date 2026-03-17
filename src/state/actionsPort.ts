@@ -1,6 +1,6 @@
 import updateInterface from './updateInterface';
 import { sample } from '../utils';
-import state from './state';
+import state, { SAVED_STATE_KEY } from './state';
 import { getUsedShips, isDay } from './selectors';
 import { shipData } from '../data/shipData';
 import { Provisions, Ship } from '../game/world/fleets';
@@ -8,6 +8,8 @@ import { minutesUntilNextMorning } from '../interface/interfaceUtils';
 import type { QuestId } from '../interface/quest/questData';
 import { getPlayerFleet, getPlayerFleetShip } from './selectorsFleet';
 import { itemData, ItemId } from '../data/itemData';
+import { hullData, GUN_CARGO_RATIO, REMODEL_COST_PER_CARGO, HULL_COST_PER_DURABILITY } from '../data/shipData';
+import type { HullType } from '../game/world/fleets';
 
 export const updateGeneral = () => {
   updateInterface.general({
@@ -43,7 +45,7 @@ export const exitBuilding = (sleep = false) => {
 };
 
 export const getAvailableSailorId = () =>
-  state.mates.find(({ role }) => role === null || Number.isNaN(role))?.sailorId;
+  state.mates.slice(1).find(({ role }) => role === null || Number.isNaN(role))?.sailorId;
 
 const generateShipUid = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 
@@ -51,16 +53,14 @@ export const addShip = (ship: Omit<Ship, 'sailorId' | 'uid'>) => {
   const sailorId = getAvailableSailorId();
   const fleet = getPlayerFleet();
 
-  if (!sailorId) {
-    throw Error('Tried to add a ship to fleet despite no available sailors');
-  }
-
   fleet.push({ ...ship, uid: generateShipUid() });
 
-  for (let i = 0; i < state.mates.length; i += 1) {
-    if (state.mates[i].sailorId === sailorId) {
-      state.mates[i].role = fleet.length - 1;
-      break;
+  if (sailorId) {
+    for (let i = 0; i < state.mates.length; i += 1) {
+      if (state.mates[i].sailorId === sailorId) {
+        state.mates[i].role = fleet.length - 1;
+        break;
+      }
     }
   }
 };
@@ -110,8 +110,6 @@ export const sellShipNumber = (shipNumber: number) => {
     if (mate) {
       mate.role = null;
     }
-
-    state.mates[0].role = 0;
   }
 
   updateGeneral();
@@ -159,8 +157,34 @@ export const completeQuest = (id: QuestId) => {
   state.quests.push(id);
 };
 
-export const receiveGold = (amount: number) => {
+export const addFame = (type: 'trade' | 'piracy' | 'adventure', amount: number) => {
+  if (!state.fame) state.fame = { trade: 0, piracy: 0, adventure: 0 };
+  state.fame[type] += amount;
+  updateGeneral();
+};
+
+export const acceptGuildQuest = (discoveryId: string, rewardGold: number) => {
+  state.guildQuest = { discoveryId, rewardGold };
+  window.localStorage.setItem(SAVED_STATE_KEY, JSON.stringify(state));
+};
+
+export const claimGuildQuestReward = (): number => {
+  if (!state.guildQuest) return 0;
+  const { rewardGold } = state.guildQuest;
+  state.gold += rewardGold;
+  state.guildQuest = undefined;
+  window.localStorage.setItem(SAVED_STATE_KEY, JSON.stringify(state));
+  updateGeneral();
+  return rewardGold;
+};
+
+export const receiveGold = (amount: number, portId?: string) => {
   state.gold += amount;
+  if (portId) {
+    if (!state.goldRewardsReceived) state.goldRewardsReceived = [];
+    state.goldRewardsReceived.push(portId);
+    window.localStorage.setItem(SAVED_STATE_KEY, JSON.stringify(state));
+  }
 
   updateGeneral();
 };
@@ -198,6 +222,147 @@ export const recruitRocco = () => {
     sailorId: '32',
     role: null,
   });
+};
+
+export const recruitMatthew = () => {
+  state.mates.push({
+    sailorId: '34',
+    role: 'firstMate',
+  });
+};
+
+export const receiveOttoShip = () => {
+  const id = '8'; // Brigantine
+
+  const { durability } = shipData[id];
+
+  addShip({
+    id,
+    name: 'Idiot',
+    crew: 0,
+    cargo: [],
+    durability: Math.floor(durability * USED_SHIP_DURABILITY),
+  });
+
+  updateGeneral();
+};
+
+export const recruitEmilio = () => {
+  state.mates.push({
+    sailorId: '35',
+    role: 'firstMate',
+  });
+};
+
+export const receiveCatalinaShip = () => {
+  const id = '11'; // Galleon
+
+  const { durability } = shipData[id];
+
+  addShip({
+    id,
+    name: 'REBEL',
+    crew: 0,
+    cargo: [],
+    durability: Math.floor(durability * USED_SHIP_DURABILITY),
+  });
+
+  updateGeneral();
+};
+
+export const recruitPaula = () => {
+  state.mates.push({
+    sailorId: '36',
+    role: 'firstMate',
+  });
+};
+
+export const recruitHans = () => {
+  state.mates.push({
+    sailorId: '40',
+    role: 'firstMate',
+  });
+};
+
+export const payBlockadeBribe = (amount: number) => {
+  state.gold = Math.max(0, state.gold - amount);
+  window.localStorage.setItem(SAVED_STATE_KEY, JSON.stringify(state));
+  updateGeneral();
+};
+
+export const receiveErnstShip = () => {
+  const id = '6'; // Caravela Latina
+
+  const { durability } = shipData[id];
+
+  addShip({
+    id,
+    name: 'Meridian',
+    crew: 0,
+    cargo: [],
+    durability: Math.floor(durability * USED_SHIP_DURABILITY),
+  });
+
+  updateGeneral();
+};
+
+export const recruitCamillo = () => {
+  state.mates.push({
+    sailorId: '37',
+    role: 'firstMate',
+  });
+};
+
+export const receivePietroShip = () => {
+  const id = '6'; // Caravela Latina
+
+  const { durability } = shipData[id];
+
+  addShip({
+    id,
+    name: 'Falcon',
+    crew: 0,
+    cargo: [],
+    durability: Math.floor(durability * USED_SHIP_DURABILITY),
+  });
+
+  updateGeneral();
+};
+
+export const recruitSalim = () => {
+  state.mates.push({
+    sailorId: '38',
+    role: 'firstMate',
+  });
+};
+
+export const receiveAliShip = () => {
+  const id = '3'; // Dhow
+
+  const { durability } = shipData[id];
+  const fleet = getPlayerFleet();
+
+  fleet.push({
+    uid: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`,
+    id,
+    name: 'Savahni',
+    crew: 0,
+    cargo: [],
+    durability: Math.floor(durability * USED_SHIP_DURABILITY),
+  });
+
+  // Assign to an available mate if one exists
+  const sailorId = getAvailableSailorId();
+  if (sailorId) {
+    for (let i = 0; i < state.mates.length; i += 1) {
+      if (state.mates[i].sailorId === sailorId) {
+        state.mates[i].role = fleet.length - 1;
+        break;
+      }
+    }
+  }
+
+  updateGeneral();
 };
 
 export const recruitEnrico = () => {
@@ -317,13 +482,17 @@ export const sellGoods = (goodsId: string, quantity: number, pricePerUnit: numbe
   const flagship = state.fleets['1'].ships[0];
   if (!flagship) return;
 
-  state.gold += quantity * pricePerUnit;
+  const revenue = quantity * pricePerUnit;
+  state.gold += revenue;
 
   flagship.cargo = flagship.cargo
     .map((item) =>
       item.type === goodsId ? { ...item, quantity: item.quantity - quantity } : item,
     )
     .filter((item) => item.quantity > 0);
+
+  if (!state.fame) state.fame = { trade: 0, piracy: 0, adventure: 0 };
+  state.fame.trade += revenue;
 
   updateGeneral();
 };
@@ -342,16 +511,63 @@ export const buyNewShip = (shipId: string, shipName: string) => {
   updateGeneral();
 };
 
-export const REMODEL_COST_MODIFIER = 0.3;
+// Calculate effective cargo given a ship's current or prospective configuration
+export const getEffectiveCargo = (
+  shipId: string,
+  configBunks: number,
+  configGuns: number,
+): number => {
+  const data = shipData[shipId];
+  const extraBunks = configBunks - data.minimumCrew;
+  const extraGuns = configGuns - data.usedGuns;
+  return Math.max(0, data.capacity - extraBunks - extraGuns * GUN_CARGO_RATIO);
+};
 
-export const getRemodelCost = (targetShipId: string) =>
-  Math.floor(shipData[targetShipId].basePrice * REMODEL_COST_MODIFIER);
+export const getRemodelCost = (
+  shipId: string,
+  currentBunks: number,
+  currentGuns: number,
+  newHull: HullType,
+  newBunks: number,
+  newGuns: number,
+): number => {
+  const currentCargo = getEffectiveCargo(shipId, currentBunks, currentGuns);
+  const newCargo = getEffectiveCargo(shipId, newBunks, newGuns);
+  const cargoCost = Math.abs(newCargo - currentCargo) * REMODEL_COST_PER_CARGO;
+  const hullCost = hullData[newHull].durabilityBonus * HULL_COST_PER_DURABILITY;
+  return Math.max(100, cargoCost + hullCost);
+};
 
-export const remodelShip = (shipNumber: number, targetShipId: string) => {
+export const remodelShip = (
+  shipNumber: number,
+  newHull: HullType,
+  newBunks: number,
+  newGuns: number,
+) => {
   const ship = state.fleets['1'].ships[shipNumber];
-  state.gold -= getRemodelCost(targetShipId);
-  ship.id = targetShipId;
-  ship.durability = shipData[targetShipId].durability;
+  const data = shipData[ship.id];
+
+  const currentBunks = ship.configBunks ?? data.minimumCrew;
+  const currentGuns = ship.configGuns ?? data.usedGuns;
+  const cost = getRemodelCost(ship.id, currentBunks, currentGuns, newHull, newBunks, newGuns);
+
+  state.gold -= cost;
+  ship.hull = newHull;
+  ship.configBunks = newBunks;
+  ship.configGuns = newGuns;
+  ship.durability = data.durability + hullData[newHull].durabilityBonus;
+  updateGeneral();
+};
+
+export const renameShip = (shipNumber: number, newName: string) => {
+  state.fleets['1'].ships[shipNumber].name = newName;
+  updateGeneral();
+};
+
+export const setFigurehead = (shipNumber: number, figureheadName: string, cost: number) => {
+  const ship = state.fleets['1'].ships[shipNumber];
+  ship.figurehead = figureheadName;
+  state.gold -= cost;
   updateGeneral();
 };
 
@@ -431,6 +647,32 @@ export const defect = (nationalityIndex: number) => {
   updateGeneral();
 };
 
+export const dismissCrew = (): number => {
+  const fleet = getPlayerFleet();
+  let freed = 0;
+  fleet.forEach((ship, i) => {
+    const minCrew = shipData[ship.id].minimumCrew;
+    const excess = Math.max(0, ship.crew - minCrew);
+    if (excess > 0) {
+      state.fleets['1'].ships[i].crew = minCrew;
+      freed += excess;
+    }
+  });
+  updateGeneral();
+  return freed;
+};
+
+export const treatCrew = (cost: number) => {
+  state.gold -= cost;
+  state.timePassed += 60;
+  updateGeneral();
+};
+
+export const gambleGold = (amount: number, won: boolean) => {
+  state.gold += won ? amount : -amount;
+  updateGeneral();
+};
+
 export const receiveShipReward = (portId: string, shipId: string, shipName: string) => {
   if (!state.shipRewardsReceived) state.shipRewardsReceived = [];
   state.shipRewardsReceived.push(portId);
@@ -441,5 +683,6 @@ export const receiveShipReward = (portId: string, shipId: string, shipName: stri
     cargo: [],
     durability: shipData[shipId].durability,
   });
+  window.localStorage.setItem(SAVED_STATE_KEY, JSON.stringify(state));
   updateGeneral();
 };

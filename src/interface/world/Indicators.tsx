@@ -29,19 +29,18 @@ export default function Indicators({ hidden }: Props) {
     wind,
     current,
   }: Pick<State, 'wind' | 'current'>) => {
-    windDirectionRef.current.src = Assets.indicators(wind.direction);
-    windSpeedRef.current.textContent = String(wind.speed);
-
-    currentDirectionRef.current.src = Assets.indicators(current.direction);
-    currentSpeedRef.current.textContent = String(current.speed);
+    if (windDirectionRef.current) windDirectionRef.current.src = Assets.indicators(wind.direction);
+    if (windSpeedRef.current) windSpeedRef.current.textContent = String(wind.speed);
+    if (currentDirectionRef.current) currentDirectionRef.current.src = Assets.indicators(current.direction);
+    if (currentSpeedRef.current) currentSpeedRef.current.textContent = String(current.speed);
   };
 
   updateInterface.playerFleetDirection = (direction: number) => {
-    playerFleetDirectionRef.current.src = Assets.indicators(direction);
+    if (playerFleetDirectionRef.current) playerFleetDirectionRef.current.src = Assets.indicators(direction);
   };
 
   updateInterface.playerFleetSpeed = (speed: number) => {
-    playerFleetSpeedRef.current.textContent = String(Math.floor(speed / 2));
+    if (playerFleetSpeedRef.current) playerFleetSpeedRef.current.textContent = String(Math.floor(speed / 2));
   };
 
   return (

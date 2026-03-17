@@ -24,7 +24,6 @@ import moslemDance from './assets/moslem-dance.ogg';
 const getAudioElement = () => {
   const audio = new Audio();
   audio.loop = true;
-  audio.autoplay = true;
   return audio;
 };
 
@@ -88,7 +87,7 @@ export default function Sound({ portId, buildingId }: Props) {
   }, []);
 
   const triggerAutoplay = () => {
-    audioRef.current.play();
+    audioRef.current.play().catch(() => {});
     setHasPlayed(true);
   };
 
@@ -96,6 +95,7 @@ export default function Sound({ portId, buildingId }: Props) {
     const track = getTrack({ portId, buildingId });
     if (audioRef.current.src !== track) {
       audioRef.current.src = track;
+      audioRef.current.play().catch(() => {});
     }
   }, [portId, buildingId]);
 

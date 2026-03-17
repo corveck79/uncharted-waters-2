@@ -7,10 +7,20 @@ import {
 import { directions, random } from '../../utils';
 
 const TARGET_REACHED_DISTANCE = 5;
+const WAYPOINT_REACHED_DISTANCE = 8;
+
+const MAP_W = 2160;
+
+// Manhattan distance with x-wrapping
+const wrapDist = (from: Position, to: Position): number => {
+  let dx = Math.abs(from.x - to.x);
+  if (dx > MAP_W / 2) dx = MAP_W - dx;
+  return dx + Math.abs(from.y - to.y);
+};
 
 // Greedy best-first: try the direction that minimises Manhattan distance to
 // target first; fall back to progressively worse directions until one is clear.
-const bestDirection = (
+export const bestDirection = (
   from: Position,
   to: Position,
   collision: (pos: Position) => boolean,
@@ -18,8 +28,8 @@ const bestDirection = (
   const sorted = ([...directions] as Direction[]).sort((a, b) => {
     const da = directionToChanges[a];
     const db = directionToChanges[b];
-    const distA = Math.abs(from.x + da.xDelta - to.x) + Math.abs(from.y + da.yDelta - to.y);
-    const distB = Math.abs(from.x + db.xDelta - to.x) + Math.abs(from.y + db.yDelta - to.y);
+    const distA = wrapDist({ x: from.x + da.xDelta, y: from.y + da.yDelta }, to);
+    const distB = wrapDist({ x: from.x + db.xDelta, y: from.y + db.yDelta }, to);
     return distA - distB;
   });
 
@@ -55,9 +65,19 @@ const createWorldNpc = (
   let movesSkipped = 0;
 
   let currentTarget = target;
+  let waypoints: Position[] = [];
+  let waypointIndex = 0;
 
   const animate = () => {
     frameAlternate = frameAlternate === 0 ? 1 : 0;
+  };
+
+  // Get the current steering target: next waypoint, or final target
+  const getSteeringTarget = (): Position => {
+    if (waypointIndex < waypoints.length) {
+      return waypoints[waypointIndex];
+    }
+    return currentTarget;
   };
 
   return {
@@ -72,7 +92,17 @@ const createWorldNpc = (
       return false;
     },
     move: () => {
-      const dir = bestDirection({ x, y }, currentTarget, collision);
+      // Advance waypoint if close enough
+      while (waypointIndex < waypoints.length) {
+        if (wrapDist({ x, y }, waypoints[waypointIndex]) < WAYPOINT_REACHED_DISTANCE) {
+          waypointIndex++;
+        } else {
+          break;
+        }
+      }
+
+      const steerTarget = getSteeringTarget();
+      const dir = bestDirection({ x, y }, steerTarget, collision);
       if (dir) {
         const { xDelta, yDelta, frameOffset: newFrameOffset } = directionToChanges[dir];
         frameOffset = newFrameOffset;
@@ -83,10 +113,15 @@ const createWorldNpc = (
     },
     setTarget: (pos: Position) => {
       currentTarget = pos;
+      waypoints = [];
+      waypointIndex = 0;
     },
-    isNearTarget: () =>
-      Math.abs(x - currentTarget.x) + Math.abs(y - currentTarget.y) <
-      TARGET_REACHED_DISTANCE,
+    setRoute: (route: Position[], finalTarget: Position) => {
+      currentTarget = finalTarget;
+      waypoints = route;
+      waypointIndex = 0;
+    },
+    isNearTarget: () => wrapDist({ x, y }, currentTarget) < TARGET_REACHED_DISTANCE,
     update: () => {
       x = xTo;
       y = yTo;

@@ -8,6 +8,8 @@ interface Cargo {
   quantity: number;
 }
 
+export type HullType = 'teak' | 'cedar' | 'beech' | 'oak' | 'copper' | 'iron';
+
 export interface Ship {
   uid: string;
   id: string;
@@ -15,6 +17,10 @@ export interface Ship {
   crew: number;
   cargo: Cargo[];
   durability: number;
+  hull?: HullType;       // hull material (default: 'teak')
+  configBunks?: number;  // crew capacity slots (default: minimumCrew)
+  configGuns?: number;   // gun slots (default: usedGuns)
+  figurehead?: string;   // figurehead type name (reduces storm chance)
 }
 
 interface Fleet {

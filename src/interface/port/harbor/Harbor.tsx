@@ -14,12 +14,14 @@ import {
   getPlayerFleet,
   getDaysProvisionsWillLast,
 } from '../../../state/selectorsFleet';
+import { getFirstMateId } from '../../../state/selectors';
+import { checkIn } from '../../../state/actionsPort';
 import HarborSummary from './HarborSummary';
 
 const harborOptions = ['Sail', 'Supply', 'Moor'] as const;
 type HarborOptions = typeof harborOptions[number];
 
-const harborDisabledOptions: HarborOptions[] = ['Moor'];
+const harborDisabledOptions: HarborOptions[] = [];
 
 export default function Harbor() {
   const { selectOption, back, state } = useBuilding<HarborOptions>();
@@ -50,6 +52,7 @@ export default function Harbor() {
   let dark = false;
 
   if (option === 'Sail') {
+    const speakerId = getFirstMateId();
     if (hasCrewAssigned()) {
       const days = getDaysProvisionsWillLast();
 
@@ -58,8 +61,8 @@ export default function Harbor() {
           body:
             days >= 10
               ? `We can sail for ${days} days. Shall we cast off?`
-              : 'We won’t be able to sail for long. Shall we cast off anyway?',
-          characterId: '32',
+              : "We won't be able to sail for long. Shall we cast off anyway?",
+          characterId: speakerId,
           confirm: {
             yes: () => {
               setSail();
@@ -69,15 +72,15 @@ export default function Harbor() {
         };
       } else {
         characterMessage = {
-          body: 'We’ll starve if we leave with no provisions!',
-          characterId: '32',
+          body: "We'll starve if we leave with no provisions!",
+          characterId: speakerId,
           acknowledge: back,
         };
       }
     } else {
       characterMessage = {
-        body: 'Some ships have no crew assigned. We won’t get anywhere.',
-        characterId: '32',
+        body: "Some ships have no crew assigned. We won't get anywhere.",
+        characterId: speakerId,
         acknowledge: back,
       };
     }
@@ -90,6 +93,17 @@ export default function Harbor() {
   if (option === 'Supply') {
     vendorMessage = null;
     children = <HarborSupply back={back} />;
+  }
+
+  if (option === 'Moor') {
+    characterMessage = {
+      body: 'We\u2019ll moor here for the night. The crew can get some rest.',
+      characterId: getFirstMateId(),
+      confirm: {
+        yes: () => { checkIn(); },
+        no: back,
+      },
+    };
   }
 
   return (

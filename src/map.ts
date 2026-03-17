@@ -308,6 +308,13 @@ const createMap = (visibleArea: [number, number], portData?: PortData) => {
     },
     tilemapColumns,
     tilemapRows,
+    /** Check if a single tile is land (for pathfinding with narrower footprint) */
+    tileIsLand: (position: Position): boolean => {
+      if (position.y < 0 || position.y >= tilemapRows) return true;
+      const x = portData ? position.x : getXWrapAround(position.x);
+      if (x < 0 || x >= tilemapColumns) return true;
+      return tiles({ x, y: position.y }) >= 50;
+    },
   };
 };
 

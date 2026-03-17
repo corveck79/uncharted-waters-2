@@ -1,3 +1,5 @@
+import { getPortGoodsBuyPrice } from './portGoodsData';
+
 export const goodsData = {
   grain:  { name: 'Grain',  basePrice: 30,  producedIn: ['1', '3', '8'],       demandedIn: ['5', '10', '4'] },
   cloth:  { name: 'Cloth',  basePrice: 100, producedIn: ['2'],                  demandedIn: ['9', '6', '13'] },
@@ -32,7 +34,11 @@ const goodsAvailableInMarket: { [marketId: string]: GoodsId[] } = {
 export const getGoodsAvailableInMarket = (marketId: string): GoodsId[] =>
   goodsAvailableInMarket[marketId] || ['grain', 'cloth'];
 
-export const getBuyPrice = (goodsId: GoodsId, marketId: string): number => {
+export const getBuyPrice = (goodsId: GoodsId, marketId: string, portId?: string): number => {
+  if (portId !== undefined) {
+    const portPrice = getPortGoodsBuyPrice(portId, goodsId);
+    if (portPrice !== undefined) return portPrice;
+  }
   const { basePrice, producedIn, demandedIn } = goodsData[goodsId];
   if (producedIn.includes(marketId)) return Math.floor(basePrice * 0.5);
   if (demandedIn.includes(marketId)) return Math.floor(basePrice * 1.5);

@@ -27,7 +27,7 @@ const start = async () => {
 
   const loop = () => {
     if (state.portId !== null) {
-      if (!state.port) {
+      if (!state.port || typeof state.port.update !== 'function') {
         state.port = createPort(state.portId);
       }
 
@@ -38,7 +38,7 @@ const start = async () => {
     }
 
     if (state.portId === null) {
-      if (!state.world) {
+      if (!state.world || typeof state.world.update !== 'function') {
         state.world = createWorld();
       }
 
